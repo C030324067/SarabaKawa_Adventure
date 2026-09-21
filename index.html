@@ -77,6 +77,15 @@
   .btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #32150f;}
   .btn.secondary{background:#2aaeb0;border-color:#b7fff0;border-right-color:#15565e;border-bottom-color:#15565e;box-shadow:4px 4px 0 #0b2b35;}
 
+  #story-dialogue{z-index:60;}
+  #story-characters{display:flex;align-items:flex-end;justify-content:center;gap:28px;margin:0 auto 14px;padding:4px 10px 0;min-height:128px;}
+  .story-character{width:112px;height:112px;object-fit:contain;image-rendering:auto;filter:drop-shadow(0 5px 0 rgba(0,0,0,.45)) drop-shadow(0 0 10px rgba(255,190,60,.22));transition:transform .18s ease,filter .18s ease;pointer-events:none;user-select:none;}
+  #story-obor{transform:translateY(3px) scale(1.06);}
+  #story-sesepuh{transform:translateY(4px) scale(1.02);}
+  #story-characters.speaker-obor #story-obor{transform:translateY(0) scale(1.12);filter:drop-shadow(0 5px 0 rgba(0,0,0,.45)) drop-shadow(0 0 14px rgba(255,166,35,.55));}
+  #story-characters.speaker-sesepuh #story-sesepuh{transform:translateY(0) scale(1.1);filter:drop-shadow(0 5px 0 rgba(0,0,0,.45)) drop-shadow(0 0 14px rgba(255,220,120,.5));}
+  #story-text{position:relative;z-index:2;}
+  @media(max-width:620px){#story-characters{gap:12px;min-height:102px;} .story-character{width:88px;height:88px;} #story-characters.speaker-obor #story-obor{transform:scale(1.08);} #story-characters.speaker-sesepuh #story-sesepuh{transform:scale(1.06);}}
   #story-dialogue{
     position:absolute;left:18px;right:18px;bottom:14px;background:#111b42;
     border:4px solid #e4a644;box-shadow:6px 6px 0 #241316;padding:13px 16px;z-index:25;
@@ -151,6 +160,10 @@
       <div id="tap-hint" class="hidden"></div>
     </div>
     <div id="story-dialogue" class="hidden">
+      <div id="story-characters" class="speaker-sesepuh" aria-hidden="true">
+        <img id="story-obor" class="story-character" src="obor_wave.png" alt="Si Obor melambaikan tangan">
+        <img id="story-sesepuh" class="story-character" src="sesepuh.png" alt="Sesepuh Kota Tanjung">
+      </div>
       <div id="story-speaker">Sesepuh Kota Tanjung</div>
       <div id="story-text"></div>
       <div id="story-buttons">
@@ -222,6 +235,8 @@
 const imgObor = new Image(); imgObor.src = 'obor.png';
 // Retro pixel-art intro waving sprite.
 const imgOborWave = new Image(); imgOborWave.src = 'obor_wave.png';
+// Story character asset: Sesepuh Kota Tanjung.
+const imgSesepuh = new Image(); imgSesepuh.src = 'sesepuh.png';
 // Retro pixel-art crouching/sliding Si Obor sprite.
 const imgOborSlide = new Image(); imgOborSlide.src = 'obor_slide.png';
 // Retro pixel-art sharp blue water geyser hazard.
@@ -282,6 +297,7 @@ const elIntro = document.getElementById('screen-intro');
 const elStoryDialogue = document.getElementById('story-dialogue');
 const elStorySpeaker = document.getElementById('story-speaker');
 const elStoryText = document.getElementById('story-text');
+const storyCharacters = document.getElementById('story-characters');
 const btnContinue = document.getElementById('btn-continue');
 const btnSkip = document.getElementById('btn-skip');
 
@@ -342,6 +358,9 @@ function showStoryLine(){
   const line = storyLines[storyIndex];
   elStorySpeaker.textContent = line.speaker;
   elStoryText.textContent = line.text;
+  // Both Si Obor and Sesepuh stay above every dialogue line; the active speaker is highlighted.
+  storyCharacters.classList.toggle('speaker-obor', line.speaker === 'Si Obor');
+  storyCharacters.classList.toggle('speaker-sesepuh', line.speaker === 'Sesepuh Kota Tanjung');
   btnContinue.textContent = (storyIndex === storyLines.length - 1) ? "Mulai!" : "Continue";
 }
 
@@ -553,7 +572,8 @@ function randomTrivia(){
 /* =========================================================
    PLAYER
 ========================================================= */
-const PLAYER_W = 82, PLAYER_H = 94;
+// Si Obor dibuat lebih gembul/lebar agar proporsi karakter asli tetap terasa.
+const PLAYER_W = 96, PLAYER_H = 94;
 let player = {
   x: 140,
   y: GROUND_Y - PLAYER_H,
@@ -620,14 +640,9 @@ function drawPlayer(){
   // Thick pixel-era halo/outline improves contrast against detailed Tabalong scenery.
   ctx.shadowColor = 'rgba(255,150,30,.98)';
   ctx.shadowBlur = 14;
-  if (player.gravityDir === -1){
-    ctx.translate(player.x + player.w/2, player.y + player.h/2);
-    ctx.rotate(Math.PI);
-    ctx.translate(-(player.w/2), -(player.h/2));
-    drawObor(img, 0, 0, player.w, player.h);
-  } else {
-    drawObor(img, player.x, player.y, player.w, player.h);
-  }
+  // Gravity hanya membalik arah gerak/posisi Si Obor.
+  // Sprite tetap tegak supaya badan dan wajah tidak ikut terbalik saat melayang ke atas.
+  drawObor(img, player.x, player.y, player.w, player.h);
   ctx.restore();
 }
 function drawObor(img,x,y,w,h){
