@@ -5,36 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Saraba Kawa Adventure - Hari Jadi Tabalong</title>
     <style>
-        /* CSS: Styling dan Antarmuka (UI) */
+        /* CSS: Styling Modern UI & Responsive Layout */
         @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Poppins:wght@400;600;700&display=swap');
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            user-select: none; /* Mencegah seleksi teks saat tap di mobile */
+            user-select: none;
             -webkit-touch-callout: none;
         }
 
         body {
-            background-color: #1e1e2f;
+            background: #0d0b18;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             font-family: 'Poppins', sans-serif;
-            overflow: hidden; /* Mencegah scroll */
+            overflow: hidden;
         }
 
         #gameWrapper {
             position: relative;
             width: 100%;
             max-width: 800px;
-            aspect-ratio: 2 / 1; /* Rasio standar 2D side-scroller */
-            background: linear-gradient(to bottom, #2b5876, #4e4376);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border-radius: 10px;
+            aspect-ratio: 2 / 1;
+            background: #111;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8), 0 0 25px rgba(255, 179, 0, 0.25);
+            border-radius: 12px;
             overflow: hidden;
+            border: 2px solid rgba(255, 215, 0, 0.4);
         }
 
         canvas {
@@ -43,7 +44,7 @@
             height: 100%;
         }
 
-        /* Heads Up Display (HUD) */
+        /* HUD Papan Skor Atas */
         #hud {
             position: absolute;
             top: 15px;
@@ -56,21 +57,29 @@
         }
 
         .score-box {
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(15, 15, 25, 0.75);
             color: #fff;
-            padding: 8px 15px;
-            border-radius: 20px;
+            padding: 8px 20px;
+            border-radius: 25px;
             font-family: 'Fredoka One', cursive;
             font-size: 1.2rem;
-            border: 2px solid #ffca28;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: 2px solid #ffd700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4), inset 0 0 10px rgba(255, 215, 0, 0.2);
+            backdrop-filter: blur(5px);
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+            letter-spacing: 0.5px;
+        }
+
+        .score-box span {
+            color: #ffee58;
         }
 
         /* Overlay Layar (Menu & Game Over) */
         .screen {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(20, 20, 30, 0.85);
+            background: rgba(10, 10, 20, 0.88);
+            backdrop-filter: blur(6px);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -88,16 +97,16 @@
         h1 {
             font-family: 'Fredoka One', cursive;
             color: #ffb300;
-            font-size: 2.8rem;
-            text-shadow: 3px 3px 0px #d84315, 6px 6px 0px #000;
+            font-size: 2.6rem;
+            text-shadow: 0 0 15px rgba(255, 179, 0, 0.6), 3px 3px 0px #d84315, 5px 5px 0px #000;
             margin-bottom: 5px;
             line-height: 1.1;
         }
 
         h2 {
-            color: #fff;
-            font-size: 1.2rem;
-            margin-bottom: 30px;
+            color: #e0e0e0;
+            font-size: 1.1rem;
+            margin-bottom: 25px;
             font-weight: 600;
             text-shadow: 1px 1px 2px #000;
         }
@@ -105,39 +114,45 @@
         .high-score-text {
             color: #4fc3f7;
             font-weight: 700;
-            font-size: 1.1rem;
-            margin-bottom: 20px;
-            background: rgba(0,0,0,0.6);
-            padding: 10px 20px;
-            border-radius: 10px;
+            font-size: 1.05rem;
+            margin-bottom: 15px;
+            background: rgba(255,255,255,0.08);
+            padding: 10px 22px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.15);
         }
 
         button {
-            background: linear-gradient(135deg, #ff8f00, #ff6f00);
+            background: linear-gradient(135deg, #ff9800, #f57c00);
             color: white;
             border: none;
-            padding: 15px 40px;
-            font-size: 1.5rem;
+            padding: 14px 38px;
+            font-size: 1.4rem;
             font-family: 'Fredoka One', cursive;
             border-radius: 30px;
             cursor: pointer;
-            box-shadow: 0 6px 0px #e65100, 0 10px 10px rgba(0,0,0,0.3);
-            transition: transform 0.1s, box-shadow 0.1s;
-            margin-top: 15px;
+            box-shadow: 0 6px 0px #b26a00, 0 10px 15px rgba(0,0,0,0.4);
+            transition: all 0.1s ease;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #ffa726, #fb8c00);
+            transform: translateY(-2px);
         }
 
         button:active {
             transform: translateY(4px);
-            box-shadow: 0 2px 0px #e65100, 0 4px 5px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 0px #b26a00, 0 4px 5px rgba(0,0,0,0.4);
         }
 
         /* Animasi Rekor Baru */
         .blinking {
             animation: blinker 0.8s linear infinite;
             color: #69f0ae;
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             font-weight: bold;
-            text-shadow: 0 0 10px #00e676;
+            text-shadow: 0 0 12px #00e676;
             margin-bottom: 10px;
         }
 
@@ -147,42 +162,43 @@
 
         /* Kotak Fakta Edukasi */
         .fact-box {
-            background: #fff;
-            color: #333;
-            max-width: 80%;
+            background: rgba(255, 255, 255, 0.95);
+            color: #222;
+            max-width: 82%;
             padding: 15px 20px;
             border-radius: 15px;
-            margin: 20px 0;
-            border-left: 8px solid #ffb300;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-            font-size: 0.95rem;
+            margin: 15px 0 20px 0;
+            border-left: 6px solid #ffb300;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            font-size: 0.9rem;
+            line-height: 1.4;
         }
 
         .fact-box h3 {
-            color: #ff6f00;
-            margin-bottom: 5px;
-            font-size: 1.1rem;
+            color: #e65100;
+            margin-bottom: 4px;
+            font-size: 1rem;
         }
 
         @media (max-width: 600px) {
-            h1 { font-size: 2rem; text-shadow: 2px 2px 0px #d84315, 4px 4px 0px #000; }
-            h2 { font-size: 0.9rem; }
-            button { font-size: 1.2rem; padding: 12px 30px; }
-            .score-box { font-size: 1rem; padding: 5px 10px; }
-            .fact-box { font-size: 0.85rem; max-width: 95%; }
+            h1 { font-size: 1.8rem; }
+            h2 { font-size: 0.85rem; }
+            button { font-size: 1.1rem; padding: 10px 25px; }
+            .score-box { font-size: 0.95rem; padding: 6px 12px; }
+            .fact-box { font-size: 0.8rem; max-width: 95%; }
         }
     </style>
 </head>
 <body>
 
 <div id="gameWrapper">
-    <!-- HUD: Tampil saat bermain -->
+    <!-- HUD: Papan Skor Atas -->
     <div id="hud" class="hidden">
         <div class="score-box">Skor: <span id="currentScore">0</span></div>
         <div class="score-box">Tertinggi: <span id="hudHighScore">0</span></div>
     </div>
 
-    <!-- Area Render Game -->
+    <!-- Area Render Game Canvas -->
     <canvas id="gameCanvas" width="800" height="400"></canvas>
 
     <!-- Menu Utama -->
@@ -190,11 +206,11 @@
         <h1>SARABA KAWA ADVENTURE</h1>
         <h2>Spesial Hari Jadi Kabupaten Tabalong</h2>
         <div class="high-score-text">🏆 Skor Tertinggi Saat Ini: <span id="menuHighScore">0</span></div>
-        <p style="color:#fff; font-size:0.9rem; margin-bottom:15px; background: rgba(0,0,0,0.5); padding:10px; border-radius:8px;">
-            <b>CARA BERMAIN:</b><br>
-            Bantu Si Obor mengumpulkan Langsat Tanjung (+10 Skor).<br>
-            Tekan <b>SPASI</b> atau <b>SENTUH LAYAR</b> untuk berjalan terbalik di langit-langit.<br>
-            Hindari semburan air agar apimu tidak padam!
+        <p style="color:#eee; font-size:0.85rem; margin-bottom:15px; background: rgba(0,0,0,0.4); padding:10px 15px; border-radius:10px; max-width: 85%;">
+            <b>PANDUAN BERMAIN:</b><br>
+            Bantu Si Obor mengumpulkan <b>Langsat Tanjung</b> (+10 Skor).<br>
+            Tekan <b>SPASI</b> atau <b>SENTUH LAYAR</b> untuk membalikkan gravitasi.<br>
+            Hindari semburan air agar api Si Obor tidak padam!
         </p>
         <button id="startBtn">MULAI GAME</button>
     </div>
@@ -203,7 +219,7 @@
     <div id="gameOverScreen" class="screen hidden">
         <h1>GAME OVER</h1>
         <p id="newRecordMsg" class="hidden blinking">🎉 REKOR BARU TERCIPTA! 🎉</p>
-        <div style="color:white; font-size:1.2rem; margin-bottom:10px;">Skor Akhir: <span id="finalScore" style="font-weight:bold; color:#ffb300; font-size:1.5rem;">0</span></div>
+        <div style="color:white; font-size:1.1rem; margin-bottom:5px;">Skor Akhir: <span id="finalScore" style="font-weight:bold; color:#ffd700; font-size:1.4rem;">0</span></div>
         
         <div class="fact-box">
             <h3>💡 Fakta Tabalong</h3>
@@ -237,7 +253,27 @@
         restartBtn: document.getElementById('restartBtn')
     };
 
-    // Data Fakta Edukasi Kabupaten Tabalong
+    /* =========================================================================
+       1. DEKLARASI ASET GAMBAR EKSTERNAL (MANUAL)
+       ========================================================================= */
+
+    // Tempat memasukkan aset gambar manual
+    const gambarObor = new Image();
+    gambarObor.src = 'obor.png'; // Nama file gambar karakter lucu saya
+
+    const gambarRintangan = new Image();
+    gambarRintangan.src = 'rintangan.png'; // Nama file gambar rintangan air/badai
+
+    const gambarLangsat = new Image();
+    gambarLangsat.src = 'langsat.png'; // Nama file gambar buah langsat
+
+    const gambarBackground = new Image();
+    gambarBackground.src = 'background.png'; // Nama file gambar latar belakang Tabalong
+
+    /* =========================================================================
+       2. VARIABEL KONFIGURASI & FAKTA TABALONG
+       ========================================================================= */
+
     const tabalongFacts = [
         "Semboyan 'Saraba Kawa' bermakna serba bisa atau sanggup melaksanakan segala hal yang baik demi kemajuan daerah.",
         "Monumen Tanjung Puri (Tugu Obor) di Mabu'un adalah ikon Tabalong. Apinya melambangkan semangat warga yang pantang menyerah.",
@@ -247,7 +283,6 @@
         "Kabupaten Tabalong yang beribukota di Tanjung merupakan kabupaten paling utara di Provinsi Kalimantan Selatan."
     ];
 
-    // Konstanta & Variabel Global Game
     let isPlaying = false;
     let animationId;
     let score = 0;
@@ -256,57 +291,42 @@
     let frames = 0;
     let baseSpeed = 5;
     let currentSpeed = baseSpeed;
-    let difficultyLevel = 0; // Bertambah setiap kelipatan 50 skor
+    let difficultyLevel = 0;
+
+    // Koordinat Parallax Background
+    let bgX = 0;
 
     // Batas lantai bawah dan langit-langit atas
     const floorY = canvas.height - 40; // 360
     const ceilY = 40;                  // 40
 
-    // Update tampilan high score awal di menu
     ui.menuHighScore.innerText = highScore;
 
-    /* --- CLASS ENTITAS GAME --- */
+    /* =========================================================================
+       3. ENTITAS GAME (PLAYER, RINTANGAN, ITEM)
+       ========================================================================= */
 
-    // 1. Karakter Utama: Si Obor
+    // 1. Karakter Utama (Si Obor)
     const player = {
         x: 100,
-        y: floorY,
-        width: 34,
-        height: 44,
+        y: floorY - 50,
+        width: 45,
+        height: 50,
         isUpsideDown: false,
         
         draw() {
             ctx.save();
-            ctx.translate(this.x, this.y);
             
-            // Logika Anti-Gravitasi (Memutar visual karakter jika di atas)
+            // Logika Rotasi / Pembalikan Gambar saat Anti-Gravitasi
             if (this.isUpsideDown) {
-                // Jika di langit-langit, posisikan poros ke bawah karakter lalu flip
-                ctx.translate(0, this.height);
+                // Gambar terbalik jika Si Obor berjalan di langit-langit
+                ctx.translate(this.x, this.y + this.height);
                 ctx.scale(1, -1);
+                ctx.drawImage(gambarObor, 0, 0, this.width, this.height);
+            } else {
+                // Gambar normal jika Si Obor berjalan di lantai
+                ctx.drawImage(gambarObor, this.x, this.y, this.width, this.height);
             }
-
-            // Render Visual Karakter "Si Obor" (Menggunakan Canvas Path)
-            // Tubuh Api Luar (Oranye/Merah)
-            ctx.beginPath();
-            ctx.moveTo(this.width / 2, 0); // Ujung atas api
-            ctx.quadraticCurveTo(this.width, this.height * 0.7, this.width / 2, this.height); // Kanan ke bawah
-            ctx.quadraticCurveTo(0, this.height * 0.7, this.width / 2, 0); // Kiri kembali ke atas
-            ctx.fillStyle = '#ff5722';
-            ctx.fill();
-
-            // Inti Api Dalam (Kuning)
-            ctx.beginPath();
-            ctx.moveTo(this.width / 2, this.height * 0.3);
-            ctx.quadraticCurveTo(this.width * 0.8, this.height * 0.8, this.width / 2, this.height * 0.95);
-            ctx.quadraticCurveTo(this.width * 0.2, this.height * 0.8, this.width / 2, this.height * 0.3);
-            ctx.fillStyle = '#ffeb3b';
-            ctx.fill();
-            
-            // Mata Karakter (Kesan Cute/Friendly)
-            ctx.fillStyle = '#212121';
-            ctx.beginPath(); ctx.arc(this.width*0.35, this.height*0.7, 3, 0, Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(this.width*0.65, this.height*0.7, 3, 0, Math.PI*2); ctx.fill();
 
             ctx.restore();
         },
@@ -318,17 +338,16 @@
         }
     };
 
-    // Array Penyimpanan Rintangan dan Item
     let obstacles = [];
     let items = [];
 
-    // 2. Rintangan (Semburan Air / Kotak Biru)
+    // 2. Rintangan (Semburan Air / Badai)
     class Obstacle {
         constructor() {
-            this.width = 40;
-            this.height = Math.random() > 0.5 ? 45 : 60; // Tinggi acak
+            this.width = 45;
+            this.height = Math.random() > 0.5 ? 60 : 80;
             this.x = canvas.width;
-            this.isTop = Math.random() > 0.5; // Muncul di langit-langit (true) atau lantai (false)
+            this.isTop = Math.random() > 0.5;
             this.y = this.isTop ? ceilY : floorY - this.height;
         }
 
@@ -337,25 +356,29 @@
         }
 
         draw() {
-            // Gambar kotak biru dengan aksen ombak sederhana
-            ctx.fillStyle = '#29b6f6';
-            ctx.fillRect(this.x, this.y, this.width, this.height);
-            
-            // Garis dalam (highlight)
-            ctx.strokeStyle = '#03a9f4';
-            ctx.lineWidth = 3;
-            ctx.strokeRect(this.x, this.y, this.width, this.height);
+            ctx.save();
+            if (this.isTop) {
+                // Putar balik gambar rintangan jika muncul di atap
+                ctx.translate(this.x, this.y + this.height);
+                ctx.scale(1, -1);
+                ctx.drawImage(gambarRintangan, 0, 0, this.width, this.height);
+            } else {
+                // Gambar rintangan normal jika muncul di lantai
+                ctx.drawImage(gambarRintangan, this.x, this.y, this.width, this.height);
+            }
+            ctx.restore();
         }
     }
 
-    // 3. Item (Buah Langsat Tanjung / Koin Kuning)
+    // 3. Item Koleksi (Langsat Tanjung)
     class Item {
         constructor() {
-            this.radius = 15;
+            this.width = 35;
+            this.height = 35;
+            this.radius = 17.5;
             this.x = canvas.width + 20;
             this.isTop = Math.random() > 0.5;
-            // Posisikan sedikit melayang agar mudah diambil
-            this.y = this.isTop ? ceilY + this.radius + 15 : floorY - this.radius - 15;
+            this.y = this.isTop ? ceilY + 15 : floorY - this.height - 15;
         }
 
         update() {
@@ -363,48 +386,36 @@
         }
 
         draw() {
-            // Gambar koin kuning / langsat
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-            ctx.fillStyle = '#fdd835';
-            ctx.fill();
-            
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = '#fbc02d';
-            ctx.stroke();
-
-            // Efek kilau dalam koin
-            ctx.beginPath();
-            ctx.arc(this.x - 4, this.y - 4, 4, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(255,255,255,0.6)';
-            ctx.fill();
+            ctx.drawImage(gambarLangsat, this.x, this.y, this.width, this.height);
         }
     }
 
-    /* --- LOGIKA PERMAINAN (SYSTEMS) --- */
+    /* =========================================================================
+       4. LOGIKA BACKGROUND SCROLLING & PENGELOLAAN OBJEK
+       ========================================================================= */
 
     function drawBackground() {
-        // Area Langit-langit
-        ctx.fillStyle = '#37474f';
-        ctx.fillRect(0, 0, canvas.width, ceilY);
-        // Garis batas langit-langit
-        ctx.fillStyle = '#263238';
-        ctx.fillRect(0, ceilY, canvas.width, 10);
+        if (isPlaying) {
+            bgX -= currentSpeed * 0.3; // Latar belakang berjalan pelan
+            if (bgX <= -canvas.width) {
+                bgX = 0;
+            }
+        }
+        
+        // Menggambar background berulang secara seamless (tanpa putus)
+        ctx.drawImage(gambarBackground, bgX, 0, canvas.width, canvas.height);
+        ctx.drawImage(gambarBackground, bgX + canvas.width, 0, canvas.width, canvas.height);
 
-        // Area Lantai Bawah
-        ctx.fillStyle = '#4e342e';
-        ctx.fillRect(0, floorY, canvas.width, canvas.height - floorY);
-        // Garis batas lantai
-        ctx.fillStyle = '#3e2723';
-        ctx.fillRect(0, floorY - 10, canvas.width, 10);
+        // Garis pembatas emas di langit-langit dan lantai
+        ctx.fillStyle = '#ffd700';
+        ctx.fillRect(0, ceilY - 3, canvas.width, 3);
+        ctx.fillRect(0, floorY, canvas.width, 3);
     }
 
     function manageEntities() {
-        // Interval Spawn Rintangan/Item semakin cepat seiring level
-        let spawnRate = Math.max(60, 100 - (difficultyLevel * 5)); 
+        let spawnRate = Math.max(55, 95 - (difficultyLevel * 6)); 
 
         if (frames % spawnRate === 0) {
-            // 60% peluang rintangan, 40% peluang item
             if (Math.random() < 0.6) {
                 obstacles.push(new Obstacle());
             } else {
@@ -412,26 +423,26 @@
             }
         }
 
-        // Loop Update & Render Items (dari belakang ke depan untuk amannya penghapusan array)
+        // Kelola Item Langsat
         for (let i = items.length - 1; i >= 0; i--) {
             let item = items[i];
             item.update();
             item.draw();
 
-            // Deteksi Tabrakan Sederhana (Circle to AABB Box Player)
-            // Memanfaatkan jarak titik pusat item ke titik pusat visual player
+            // Deteksi Tabrakan Karakter vs Langsat
             let px = player.x + player.width / 2;
             let py = player.y + player.height / 2;
-            
-            let dist = Math.hypot(item.x - px, item.y - py);
+            let ix = item.x + item.width / 2;
+            let iy = item.y + item.height / 2;
+
+            let dist = Math.hypot(ix - px, iy - py);
             
             if (dist < item.radius + (player.width / 2)) {
-                // Item Terambil
                 score += 10;
                 ui.currentScore.innerText = score;
                 items.splice(i, 1);
                 
-                // Sistem Kesulitan: Naik level kecepatan tiap kelipatan 50 skor
+                // Tingkatkan kecepatan setiap kelipatan 50 skor
                 let newLevel = Math.floor(score / 50);
                 if (newLevel > difficultyLevel) {
                     difficultyLevel = newLevel;
@@ -440,24 +451,23 @@
                 continue;
             }
 
-            // Hapus jika keluar layar kiri
-            if (item.x + item.radius < 0) {
+            if (item.x + item.width < 0) {
                 items.splice(i, 1);
             }
         }
 
-        // Loop Update & Render Rintangan
+        // Kelola Rintangan
         for (let i = obstacles.length - 1; i >= 0; i--) {
             let obs = obstacles[i];
             obs.update();
             obs.draw();
 
-            // Deteksi Tabrakan Rintangan (AABB Collision Hitbox)
+            // Deteksi Tabrakan Karakter vs Rintangan
             if (
-                player.x < obs.x + obs.width &&
-                player.x + player.width > obs.x &&
-                player.y < obs.y + obs.height &&
-                player.y + player.height > obs.y
+                player.x < obs.x + obs.width - 5 &&
+                player.x + player.width - 5 > obs.x &&
+                player.y < obs.y + obs.height - 5 &&
+                player.y + player.height - 5 > obs.y
             ) {
                 gameOver();
             }
@@ -468,13 +478,16 @@
         }
     }
 
-    /* --- PENGENDALIAN GAME & SIKLUS (LIFECYCLE) --- */
+    /* =========================================================================
+       5. SIKLUS GAME & EVENT HANDLER
+       ========================================================================= */
 
     function resetGame() {
         score = 0;
         difficultyLevel = 0;
         currentSpeed = baseSpeed;
         frames = 0;
+        bgX = 0;
         obstacles = [];
         items = [];
         
@@ -505,15 +518,13 @@
         ui.gameOverScreen.classList.remove('hidden');
         ui.finalScore.innerText = score;
 
-        // Cek dan Simpan Skor Tertinggi (High Score) menggunakan localStorage
         if (score > highScore) {
             highScore = score;
             localStorage.setItem('tabalong_highscore', highScore);
-            ui.newRecordMsg.classList.remove('hidden'); // Tampilkan teks rekor baru
+            ui.newRecordMsg.classList.remove('hidden');
         }
         ui.menuHighScore.innerText = highScore;
 
-        // Tampilkan Fakta Edukasi Acak
         const randIndex = Math.floor(Math.random() * tabalongFacts.length);
         ui.randomFact.innerText = tabalongFacts[randIndex];
     }
@@ -521,7 +532,6 @@
     function gameLoop() {
         if (!isPlaying) return;
 
-        // Bersihkan canvas setiap frame
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         drawBackground();
@@ -532,33 +542,30 @@
         animationId = requestAnimationFrame(gameLoop);
     }
 
-    /* --- EVENT LISTENER (INPUT KENDALI) --- */
-
-    // Kendali Keyboard (Spasi)
+    // Event Listener Kendali Keyboard (Spasi)
     window.addEventListener('keydown', (e) => {
         if (e.code === 'Space') {
-            e.preventDefault(); // Cegah scrolling browser
+            e.preventDefault();
             if (isPlaying) player.flipGravity();
         }
     });
 
-    // Kendali Layar Sentuh (Mobile-Friendly)
+    // Event Listener Kendali Touch Mobile
     canvas.addEventListener('touchstart', (e) => {
         e.preventDefault();
         if (isPlaying) player.flipGravity();
     });
 
-    // Kendali Klik Mouse (Desktop alternative)
+    // Event Listener Kendali Klik Mouse
     canvas.addEventListener('mousedown', (e) => {
         e.preventDefault();
         if (isPlaying) player.flipGravity();
     });
 
-    // Event Tombol UI
     ui.startBtn.addEventListener('click', startGame);
     ui.restartBtn.addEventListener('click', startGame);
 
-    // Render layar kosong (inisiasi grafik awal saat website baru dibuka)
+    // Render Awal Tampilan Canvas
     player.y = floorY - player.height;
     drawBackground();
     player.draw();
