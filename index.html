@@ -1,665 +1,1141 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Saraba Kawa Adventure - Hari Jadi Tabalong</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Poppins:wght@400;600;700&display=swap');
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Saraba Kawa Adventure — Special Anniversary Edition</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;700;900&display=swap');
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            user-select: none;
-            -webkit-touch-callout: none;
-        }
+  :root{
+    --clr-fire-1:#ff7a18;
+    --clr-fire-2:#ffbe3d;
+    --clr-fire-3:#ff3d3d;
+    --clr-night-1:#0b1030;
+    --clr-night-2:#1a2352;
+    --clr-gold:#ffd166;
+    --clr-teal:#2ee6c8;
+    --clr-water:#3fb0ff;
+    --clr-panel:#151a3c;
+    --clr-panel-light:#212a5c;
+    --clr-text:#fdf6e9;
+  }
 
-        body {
-            background: #0f0c20;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            font-family: 'Poppins', sans-serif;
-            overflow: hidden;
-        }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;height:100%;
+    background:radial-gradient(ellipse at top, #1a2352 0%, #0b0e24 60%, #06071a 100%);
+    font-family:'Nunito',sans-serif;
+    color:var(--clr-text);
+    overflow:hidden;
+    -webkit-tap-highlight-color:transparent;
+    user-select:none;
+  }
 
-        #gameWrapper {
-            position: relative;
-            width: 100%;
-            max-width: 1100px;
-            aspect-ratio: 16 / 9;
-            background: #111;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8), 0 0 25px rgba(255, 179, 0, 0.3);
-            border-radius: 12px;
-            overflow: hidden;
-            border: 3px solid #ffb300;
-        }
+  h1,h2,h3,.title-font{font-family:'Baloo 2',cursive;}
 
-        canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
+  #game-wrap{
+    position:relative;
+    width:100vw;height:100vh;
+    display:flex;align-items:center;justify-content:center;
+  }
 
-        /* HUD (Papan Skor & Health Bar) */
-        #hud {
-            position: absolute;
-            top: 15px;
-            left: 20px;
-            right: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            pointer-events: none;
-            z-index: 10;
-        }
+  #stage{
+    position:relative;
+    width:min(96vw, 960px);
+    aspect-ratio: 960/540;
+    background:#000;
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 0 0 3px rgba(255,209,102,.35), 0 0 40px rgba(255,122,24,.35), 0 20px 60px rgba(0,0,0,.6);
+  }
 
-        .hud-box {
-            background: rgba(15, 15, 25, 0.75);
-            color: #fff;
-            padding: 8px 18px;
-            border-radius: 20px;
-            font-family: 'Fredoka One', cursive;
-            font-size: 1.1rem;
-            border: 2px solid #ffd700;
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
-            backdrop-filter: blur(4px);
-        }
+  canvas{
+    position:absolute;top:0;left:0;
+    width:100%;height:100%;
+    display:block;
+    image-rendering:optimizeQuality;
+  }
 
-        .hud-box span { color: #ffee58; }
+  .overlay{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;
+    padding:min(4vw,24px);
+    background:linear-gradient(180deg, rgba(6,7,26,.55), rgba(6,7,26,.85));
+    backdrop-filter:blur(1.5px);
+    z-index:20;
+  }
+  .hidden{display:none !important;}
 
-        /* Health Bar UI */
-        .health-container {
-            width: 220px;
-            height: 24px;
-            background: rgba(0,0,0,0.7);
-            border-radius: 15px;
-            border: 2px solid #fff;
-            overflow: hidden;
-            position: relative;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        }
+  .glow-title{
+    font-size:clamp(22px,4.2vw,40px);
+    font-weight:800;
+    letter-spacing:.5px;
+    color:var(--clr-gold);
+    text-shadow:0 0 8px rgba(255,209,102,.8), 0 0 26px rgba(255,122,24,.6);
+    margin:0 0 6px 0;
+  }
+  .sub-title{
+    font-size:clamp(12px,1.6vw,16px);
+    color:#ffe9c2;
+    margin:0 0 18px 0;
+    opacity:.9;
+  }
 
-        #healthBar {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, #ff1744, #ff9100, #00e676);
-            transition: width 0.3s ease;
-        }
+  .btn{
+    font-family:'Baloo 2',cursive;
+    font-size:clamp(14px,2vw,18px);
+    font-weight:700;
+    color:#1a1330;
+    background:linear-gradient(180deg,var(--clr-gold),var(--clr-fire-1));
+    border:none;
+    padding:12px 26px;
+    border-radius:14px;
+    cursor:pointer;
+    box-shadow:0 0 0 2px rgba(255,255,255,.15) inset, 0 6px 0 #a45312, 0 8px 18px rgba(255,122,24,.45);
+    transition:transform .08s ease, box-shadow .08s ease;
+  }
+  .btn:active{
+    transform:translateY(4px);
+    box-shadow:0 0 0 2px rgba(255,255,255,.15) inset, 0 2px 0 #a45312, 0 4px 10px rgba(255,122,24,.45);
+  }
+  .btn.secondary{
+    background:linear-gradient(180deg,#4bd8c9,#1fa696);
+    box-shadow:0 0 0 2px rgba(255,255,255,.15) inset, 0 6px 0 #0f5f56, 0 8px 18px rgba(46,230,200,.35);
+  }
+  .btn.secondary:active{
+    box-shadow:0 0 0 2px rgba(255,255,255,.15) inset, 0 2px 0 #0f5f56, 0 4px 10px rgba(46,230,200,.35);
+  }
 
-        #healthText {
-            position: absolute;
-            top: 0; left: 0; width: 100%;
-            text-align: center;
-            font-size: 12px;
-            font-weight: bold;
-            color: white;
-            line-height: 24px;
-            text-shadow: 1px 1px 2px #000;
-        }
+  /* ---- Story dialogue box ---- */
+  #story-dialogue{
+    position:absolute;
+    bottom:14px;left:14px;right:14px;
+    background:linear-gradient(180deg, var(--clr-panel-light), var(--clr-panel));
+    border:2px solid rgba(255,209,102,.55);
+    border-radius:16px;
+    padding:14px 18px;
+    box-shadow:0 0 22px rgba(255,122,24,.25), 0 10px 24px rgba(0,0,0,.5);
+    z-index:25;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    align-items:stretch;
+  }
+  #story-speaker{
+    font-family:'Baloo 2',cursive;
+    font-weight:700;
+    color:var(--clr-gold);
+    font-size:clamp(13px,1.8vw,16px);
+    text-shadow:0 0 6px rgba(255,209,102,.6);
+  }
+  #story-text{
+    font-size:clamp(12px,1.7vw,15px);
+    line-height:1.4;
+    color:#fff8ea;
+    min-height:2.6em;
+  }
+  #story-buttons{display:flex;justify-content:flex-end;gap:10px;}
+  #story-buttons .btn{padding:8px 18px;font-size:clamp(12px,1.5vw,14px);}
 
-        /* Overlay Screens */
-        .screen {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(10, 10, 20, 0.9);
-            backdrop-filter: blur(8px);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            z-index: 20;
-            padding: 25px;
-        }
+  /* ---- Difficulty screen ---- */
+  #difficulty-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(120px,1fr));
+    gap:14px;
+    margin-top:6px;
+    width:min(90%,460px);
+  }
+  .diff-btn{
+    font-family:'Baloo 2',cursive;
+    font-weight:700;
+    font-size:clamp(13px,1.9vw,17px);
+    padding:16px 10px;
+    border-radius:14px;
+    border:2px solid rgba(255,255,255,.15);
+    cursor:pointer;
+    color:#fff;
+    text-shadow:0 1px 3px rgba(0,0,0,.5);
+    box-shadow:0 6px 16px rgba(0,0,0,.4);
+    transition:transform .08s ease;
+  }
+  .diff-btn:active{transform:translateY(3px);}
+  .diff-veryeasy{background:linear-gradient(160deg,#5be08a,#1f9a58);}
+  .diff-easy{background:linear-gradient(160deg,#4bc4ff,#1f7fbf);}
+  .diff-hard{background:linear-gradient(160deg,#ff9a4b,#d9601f);}
+  .diff-veryhard{background:linear-gradient(160deg,#ff5c6c,#b8202f);}
+  .diff-desc{
+    font-size:clamp(10px,1.3vw,12px);
+    display:block;
+    font-weight:400;
+    font-family:'Nunito',sans-serif;
+    opacity:.9;
+    margin-top:4px;
+  }
 
-        .screen.hidden { display: none !important; }
+  /* ---- HUD ---- */
+  #hud{
+    position:absolute;top:0;left:0;right:0;
+    display:flex;flex-direction:column;gap:6px;
+    padding:10px 14px;
+    z-index:15;
+    pointer-events:none;
+  }
+  #hud-top-row{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+  .hud-chip{
+    background:rgba(10,12,35,.6);
+    border:1px solid rgba(255,209,102,.4);
+    border-radius:10px;
+    padding:5px 10px;
+    font-family:'Baloo 2',cursive;
+    font-size:clamp(11px,1.5vw,14px);
+    color:var(--clr-gold);
+    text-shadow:0 0 6px rgba(255,209,102,.5);
+    white-space:nowrap;
+  }
+  #distance-bar-track{
+    position:relative;
+    height:14px;
+    border-radius:8px;
+    background:rgba(10,12,35,.65);
+    border:1px solid rgba(255,209,102,.4);
+    overflow:hidden;
+    box-shadow:inset 0 0 6px rgba(0,0,0,.5);
+  }
+  #distance-bar-fill{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg,var(--clr-fire-2),var(--clr-fire-1),var(--clr-fire-3));
+    box-shadow:0 0 10px rgba(255,122,24,.8);
+    transition:width .15s linear;
+  }
+  #distance-flag{
+    position:absolute;right:2px;top:50%;transform:translateY(-50%);
+    font-size:12px;
+  }
+  #health-bar-track{
+    position:relative;
+    height:14px;
+    border-radius:8px;
+    background:rgba(10,12,35,.65);
+    border:1px solid rgba(63,176,255,.5);
+    overflow:hidden;
+    box-shadow:inset 0 0 6px rgba(0,0,0,.5);
+  }
+  #health-bar-fill{
+    height:100%;
+    width:100%;
+    background:linear-gradient(90deg,#ff3d3d,#ffbe3d,#5be08a);
+    box-shadow:0 0 10px rgba(46,230,200,.6);
+    transition:width .12s linear;
+  }
+  #level-label{
+    font-family:'Baloo 2',cursive;
+    font-size:clamp(11px,1.6vw,14px);
+    color:#fff;
+    text-shadow:0 0 6px rgba(0,0,0,.6);
+  }
 
-        h1 {
-            font-family: 'Fredoka One', cursive;
-            color: #ffb300;
-            font-size: 2.8rem;
-            text-shadow: 3px 3px 0px #d84315, 5px 5px 0px #000;
-            margin-bottom: 8px;
-        }
+  /* ---- Virtual slide button ---- */
+  #slide-btn{
+    position:absolute;
+    bottom:16px;right:16px;
+    width:74px;height:74px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #4bd8c9, #0f8c7d);
+    border:3px solid rgba(255,255,255,.5);
+    box-shadow:0 6px 18px rgba(0,0,0,.5), 0 0 18px rgba(46,230,200,.5);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Baloo 2',cursive;
+    font-size:12px;font-weight:700;color:#04231f;
+    z-index:18;
+    touch-action:none;
+  }
+  #slide-btn:active{filter:brightness(1.2);}
 
-        h2 {
-            color: #e0e0e0;
-            font-size: 1.2rem;
-            margin-bottom: 20px;
-        }
+  #tap-hint{
+    position:absolute;
+    top:50%;left:50%;transform:translate(-50%,-50%);
+    font-family:'Baloo 2',cursive;
+    font-size:clamp(14px,2.4vw,20px);
+    color:rgba(255,255,255,.55);
+    pointer-events:none;
+    text-shadow:0 0 10px rgba(0,0,0,.6);
+    z-index:14;
+    animation:hintPulse 1.6s ease-in-out infinite;
+  }
+  @keyframes hintPulse{0%,100%{opacity:.25;}50%{opacity:.7;}}
 
-        .info-box {
-            background: rgba(255, 255, 255, 0.95);
-            color: #222;
-            max-width: 750px;
-            padding: 20px 25px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            border-left: 8px solid #ffb300;
-            font-size: 0.95rem;
-            line-height: 1.5;
-            text-align: left;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-        }
+  /* ---- Trivia ---- */
+  #trivia-box{
+    max-width:min(90%,520px);
+    background:linear-gradient(180deg,var(--clr-panel-light),var(--clr-panel));
+    border:2px solid rgba(46,230,200,.55);
+    border-radius:18px;
+    padding:22px 24px;
+    box-shadow:0 0 30px rgba(46,230,200,.3);
+  }
+  #trivia-box h3{margin:0 0 10px 0;color:var(--clr-teal);text-shadow:0 0 8px rgba(46,230,200,.6);}
+  #trivia-box p{font-size:clamp(12px,1.7vw,15px);line-height:1.5;margin:0 0 16px 0;}
 
-        .info-box h3 {
-            color: #d84315;
-            margin-bottom: 8px;
-            font-family: 'Fredoka One', cursive;
-            font-size: 1.3rem;
-        }
+  /* ---- Game over ---- */
+  #gameOverScreen{
+    z-index:100;
+    pointer-events:auto;
+  }
+  #gameOverScreen .btn, #gameOverScreen button{
+    pointer-events:auto;
+    position:relative;
+    z-index:101;
+  }
+  #gameover-panel{
+    max-width:min(90%,480px);
+    background:linear-gradient(180deg,var(--clr-panel-light),var(--clr-panel));
+    border:2px solid rgba(255,61,61,.55);
+    border-radius:18px;
+    padding:24px;
+    box-shadow:0 0 30px rgba(255,61,61,.35);
+  }
+  #gameover-panel.win{border-color:rgba(255,209,102,.7);box-shadow:0 0 30px rgba(255,209,102,.4);}
+  #go-title{margin:0 0 6px 0;}
+  #go-stats{margin:12px 0 22px 0;font-size:clamp(12px,1.7vw,15px);line-height:1.7;}
+  #new-record{
+    font-family:'Baloo 2',cursive;
+    color:var(--clr-gold);
+    font-weight:800;
+    margin:0 0 18px 0;
+    padding:4px 8px;
+    line-height:1.25;
+    animation:blink 0.9s steps(1) infinite;
+  }
+  @keyframes blink{0%,49%{opacity:1;}50%,100%{opacity:0;}}
+  .go-btn-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;position:relative;z-index:101;margin-top:4px;}
 
-        button {
-            background: linear-gradient(135deg, #ff9800, #f57c00);
-            color: white;
-            border: none;
-            padding: 12px 35px;
-            font-size: 1.4rem;
-            font-family: 'Fredoka One', cursive;
-            border-radius: 30px;
-            cursor: pointer;
-            box-shadow: 0 5px 0px #b26a00;
-            transition: transform 0.1s;
-        }
+  #menu-highscore{
+    margin-top:4px;
+    font-size:clamp(11px,1.5vw,13px);
+    color:var(--clr-teal);
+  }
 
-        button:active {
-            transform: translateY(3px);
-            box-shadow: 0 2px 0px #b26a00;
-        }
-
-        .controls-hint {
-            color: #4fc3f7;
-            font-size: 0.9rem;
-            background: rgba(0,0,0,0.5);
-            padding: 10px 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-
-        @media (max-width: 768px) {
-            h1 { font-size: 1.8rem; }
-            h2 { font-size: 0.9rem; }
-            .info-box { font-size: 0.85rem; padding: 12px; }
-            button { font-size: 1.1rem; padding: 10px 25px; }
-            .health-container { width: 140px; }
-        }
-    </style>
+  @media (max-width:520px){
+    #slide-btn{width:62px;height:62px;font-size:10px;}
+  }
+</style>
 </head>
 <body>
+<div id="game-wrap">
+  <div id="stage">
+    <canvas id="gameCanvas" width="960" height="540"></canvas>
 
-<div id="gameWrapper">
-    <!-- Backsound Audio -->
-    <audio id="bgMusic" loop>
-        <source src="bgm.mp3" type="audio/mpeg">
-    </audio>
+    <!-- STORY INTRO -->
+    <div id="screen-intro" class="overlay">
+      <div id="tap-hint" class="hidden"></div>
+    </div>
+    <div id="story-dialogue" class="hidden">
+      <div id="story-speaker">Sesepuh Kota Tanjung</div>
+      <div id="story-text"></div>
+      <div id="story-buttons">
+        <button class="btn secondary" id="btn-skip">Skip</button>
+        <button class="btn" id="btn-continue">Continue</button>
+      </div>
+    </div>
 
-    <!-- HUD Saat Bermain -->
+    <!-- DIFFICULTY SELECTION -->
+    <div id="screen-difficulty" class="overlay hidden">
+      <h1 class="glow-title">Pilih Tingkat Kesulitan</h1>
+      <p class="sub-title">Semakin tinggi kesulitan, semakin cepat arus Sungai Tabalong menghanyutkanmu!</p>
+      <div id="difficulty-grid">
+        <button class="diff-btn diff-veryeasy" data-diff="veryeasy">Very Easy<span class="diff-desc">Santai &amp; ramah pemula</span></button>
+        <button class="diff-btn diff-easy" data-diff="easy">Easy<span class="diff-desc">Kecepatan sedang</span></button>
+        <button class="diff-btn diff-hard" data-diff="hard">Hard<span class="diff-desc">Cepat &amp; padat rintangan</span></button>
+        <button class="diff-btn diff-veryhard" data-diff="veryhard">Very Hard<span class="diff-desc">Untuk para juara sejati</span></button>
+      </div>
+      <div id="menu-highscore">🏆 Rekor Tertinggi: <span id="menu-hs-value">0</span></div>
+    </div>
+
+    <!-- HUD -->
     <div id="hud" class="hidden">
-        <div class="hud-box">Skor: <span id="currentScore">0</span></div>
-        
-        <div class="health-container">
-            <div id="healthBar"></div>
-            <div id="healthText">100%</div>
+      <div id="hud-top-row">
+        <div class="hud-chip">🔥 Skor: <span id="hud-score">0</span></div>
+        <div id="level-label">Kota Tanjung</div>
+        <div class="hud-chip">🏆 <span id="hud-highscore">0</span></div>
+      </div>
+      <div id="distance-bar-track"><div id="distance-bar-fill"></div><div id="distance-flag">🏁</div></div>
+      <div id="health-bar-track"><div id="health-bar-fill"></div></div>
+    </div>
+    <button id="slide-btn" class="hidden">SLIDE<br>▼</button>
+
+    <!-- TRIVIA -->
+    <div id="screen-trivia" class="overlay hidden">
+      <div id="trivia-box">
+        <h3>✨ Tahukah Kamu?</h3>
+        <p id="trivia-text"></p>
+        <button class="btn" id="btn-trivia-continue">Lanjutkan Perjalanan</button>
+      </div>
+    </div>
+
+    <!-- GAME OVER / WIN -->
+    <div id="gameOverScreen" class="overlay hidden">
+      <div id="gameover-panel">
+        <h2 id="go-title" class="glow-title">Api Padam...</h2>
+        <div id="new-record" class="hidden">🎉 REKOR BARU TERCIPTA! 🎉</div>
+        <div id="go-stats">
+          Skor Akhir: <span id="go-score">0</span><br>
+          Rekor Tertinggi: <span id="go-highscore">0</span>
         </div>
-
-        <div class="hud-box">Wilayah: <span id="levelName">Kota Saraba Kawa</span></div>
-    </div>
-
-    <!-- Canvas Game -->
-    <canvas id="gameCanvas" width="1000" height="562"></canvas>
-
-    <!-- 1. Menu Utama -->
-    <div id="startScreen" class="screen">
-        <h1>SARABA KAWA ADVENTURE</h1>
-        <h2>Spesial Hari Jadi Kabupaten Tabalong</h2>
-        <div class="controls-hint">
-            <b>KONTROL PC:</b> [Spasi / Panah Atas] Lompat | [Panah Bawah] Meluncur<br>
-            <b>KONTROL HP:</b> [Ketuk Kanan] Lompat | [Ketuk Kiri] Meluncur
+        <div class="go-btn-row">
+          <button class="btn" id="btn-restart">Main Lagi</button>
+          <button class="btn secondary" id="btn-menu">Menu Utama</button>
         </div>
-        <button id="btnStart">MULAI PETUALANGAN</button>
+      </div>
     </div>
-
-    <!-- 2. Layar Cerita (Storyline) -->
-    <div id="storyScreen" class="screen hidden">
-        <div class="info-box">
-            <h3>📖 Kisah Api yang Meredup...</h3>
-            <p>Menjelang Hari Jadi Kabupaten Tabalong, api legendaris di <b>Tugu Obor Pancasila (Mabu'un)</b> tiba-tiba meredup karena kekuatan angin badai. Jika api ini padam, perayaan hari jadi tidak bisa dimulai!</p>
-            <br>
-            <p>Misi kamu: Bantu <b>Si Obor</b> menjelajahi 3 wilayah besar di Tabalong untuk mengumpulkan <b>Minyak/Gas Bumi</b> agar api tetap menyala, sambil memetik <b>Langsat Tanjung</b> untuk pesta rakyat.</p>
-            <br>
-            <p style="text-align:center; font-weight:bold; color:#d84315;"><i>"Saraba Kawa! Menghadapi rintangan, pantang padam!"</i></p>
-        </div>
-        <button id="btnStoryNext">BERANGKAT!</button>
-    </div>
-
-    <!-- 3. Trivia Pop-Up Edukasi (Antar Level) -->
-    <div id="eduScreen" class="screen hidden">
-        <h1>LEVEL SELESAI!</h1>
-        <div class="info-box" id="eduFactContent"></div>
-        <button id="btnEduNext">LANJUTKAN MISI</button>
-    </div>
-
-    <!-- 4. Layar Game Over -->
-    <div id="gameOverScreen" class="screen hidden">
-        <h1 style="color:#ff1744;">API PADAM!</h1>
-        <h2 style="margin-bottom:10px;">Si Obor kehabisan energi api.</h2>
-        <div style="color:white; font-size:1.3rem; margin-bottom:20px;">Skor Akhir: <span id="finalScore" style="color:#ffd700; font-weight:bold;">0</span></div>
-        <button id="btnRestart">MAIN LAGI</button>
-    </div>
+  </div>
 </div>
 
 <script>
-    /* =========================================================================
-       1. DEKLARASI ASET GAMBAR & AUDIO EKSTERNAL
-       ========================================================================= */
-    const bgm = document.getElementById('bgMusic');
-    bgm.volume = 0.4;
+(function(){
+"use strict";
 
-    // Karakter Si Obor
-    const imgOborRun = new Image(); imgOborRun.src = 'obor.png'; 
-    const imgOborSlide = new Image(); imgOborSlide.src = 'obor_slide.png'; 
+/* =========================================================
+   ASSET LOADING
+========================================================= */
+const imgObor = new Image(); imgObor.src = 'obor.png';
+const imgOborWave = new Image(); imgOborWave.src = 'obor_wave.png';
+const imgOborSlide = new Image(); imgOborSlide.src = 'obor_slide.png';
+const imgRintangan = new Image(); imgRintangan.src = 'rintangan.png';
+const imgAngin = new Image(); imgAngin.src = 'angin.png';
+const imgLangsat = new Image(); imgLangsat.src = 'langsat.png';
+const imgBgKota = new Image(); imgBgKota.src = 'bg_kota.png';
+const imgBgHutan = new Image(); imgBgHutan.src = 'bg_hutan.png';
+const imgBgGua = new Image(); imgBgGua.src = 'bg_gua.png';
 
-    // Item Koleksi
-    const imgLangsat = new Image(); imgLangsat.src = 'langsat.png'; 
-    const imgMinyak = new Image(); imgMinyak.src = 'minyak.png'; 
+const bgmGame = new Audio('bgm.mp3');
+const sfxLangsat = new Audio('sfx_langsat.mp3');
+const sfxWater = new Audio('sfx_water.mp3');
+const sfxWind = new Audio('sfx_wind.mp3');
+bgmGame.loop = true;
 
-    // Rintangan
-    const imgAirBawah = new Image(); imgAirBawah.src = 'rintangan.png'; // Rintangan bawah (dilompati)
-    const imgAnginAtas = new Image(); imgAnginAtas.src = 'angin.png';   // Rintangan atas (dilewati dengan meluncur)
+let audioUnlocked = false;
+function unlockAudio(){
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+  bgmGame.currentTime = 0;
+  const p = bgmGame.play();
+  if (p && typeof p.catch === 'function'){ p.catch(()=>{ /* ignore autoplay rejection, will retry on next gesture */ audioUnlocked = false; }); }
+}
+function playSfx(sfx){
+  try{
+    sfx.currentTime = 0;
+    const p = sfx.play();
+    if (p && typeof p.catch === 'function'){ p.catch(()=>{}); }
+  } catch(e){ /* ignore */ }
+}
 
-    // Latar Belakang (3 Level)
-    const bgKota = new Image(); bgKota.src = 'bg_kota.png';
-    const bgHutan = new Image(); bgHutan.src = 'bg_hutan.png';
-    const bgGua = new Image(); bgGua.src = 'bg_gua.png';
+function imgReady(im){ return im.complete && im.naturalWidth > 0; }
 
-    // Fallback jika bg_kota.png belum ada, pakai background.png
-    const bgDefault = new Image(); bgDefault.src = 'background.png';
+/* =========================================================
+   CANVAS / GLOBAL SETUP
+========================================================= */
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+const GROUND_Y = H - 70;
+const CEIL_Y = 70;
 
-    /* =========================================================================
-       2. VARIABEL GAME & SYSTEM
-       ========================================================================= */
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
+/* =========================================================
+   STATE MACHINE
+========================================================= */
+const STATE = { INTRO:'intro', DIFFICULTY:'difficulty', PLAYING:'playing', TRIVIA:'trivia', GAMEOVER:'gameover', WIN:'win' };
+let gameState = STATE.INTRO;
 
-    const ui = {
-        hud: document.getElementById('hud'),
-        score: document.getElementById('currentScore'),
-        healthBar: document.getElementById('healthBar'),
-        healthText: document.getElementById('healthText'),
-        levelName: document.getElementById('levelName'),
-        finalScore: document.getElementById('finalScore'),
-        startScreen: document.getElementById('startScreen'),
-        storyScreen: document.getElementById('storyScreen'),
-        eduScreen: document.getElementById('eduScreen'),
-        eduFactContent: document.getElementById('eduFactContent'),
-        gameOverScreen: document.getElementById('gameOverScreen')
-    };
+/* =========================================================
+   DOM REFS
+========================================================= */
+const elIntro = document.getElementById('screen-intro');
+const elStoryDialogue = document.getElementById('story-dialogue');
+const elStorySpeaker = document.getElementById('story-speaker');
+const elStoryText = document.getElementById('story-text');
+const btnContinue = document.getElementById('btn-continue');
+const btnSkip = document.getElementById('btn-skip');
 
-    const TRIVIA_FACTS = {
-        2: "<h3>💡 Fakta Tabalong #1</h3><p>Tahukah kamu? Kabupaten Tabalong resmi berdiri pada <b>1 Desember 1965</b> berdasarkan UU No. 8 Tahun 1965.<br><br>Selamat! Kamu berhasil melewati Kota Tanjung dan kini memasuki <b>Jalur Emas Hitam</b> (Murung Pudak / Upau)!</p>",
-        3: "<h3>💡 Fakta Tabalong #2</h3><p>Tugu Obor Pancasila Mabu'un dibangun sebagai simbol bahwa Tabalong adalah kota industri minyak dan gas yang menerangi Kalimantan Selatan!<br><br>Hebat! Sekarang kamu memasuki area <b>Wisata Alam Gua Liang Tapah & Air Terjun Lano</b>!</p>"
-    };
+const elDifficulty = document.getElementById('screen-difficulty');
+const menuHsValue = document.getElementById('menu-hs-value');
 
-    let isPlaying = false, isPaused = false;
-    let animationId, frames = 0, score = 0, health = 100, currentLevel = 1;
-    let baseSpeed = 6, currentSpeed = 6;
-    let bgX = 0, activeBgImage = bgKota;
+const elHud = document.getElementById('hud');
+const hudScore = document.getElementById('hud-score');
+const hudHighscore = document.getElementById('hud-highscore');
+const levelLabel = document.getElementById('level-label');
+const distanceFill = document.getElementById('distance-bar-fill');
+const healthFill = document.getElementById('health-bar-fill');
+const slideBtn = document.getElementById('slide-btn');
 
-    const floorY = 460; // Posisi tanah di canvas
+const elTrivia = document.getElementById('screen-trivia');
+const triviaText = document.getElementById('trivia-text');
+const btnTriviaContinue = document.getElementById('btn-trivia-continue');
 
-    /* =========================================================================
-       3. ENTITAS KARAKTER (SI OBOR)
-       ========================================================================= */
-    const player = {
-        x: 120,
-        y: floorY - 75,
-        width: 75,
-        height: 75,
-        vy: 0,
-        gravity: 0.75,
-        jumpPower: -15,
-        isJumping: false,
-        isSliding: false,
+const elGameOver = document.getElementById('gameOverScreen');
+const goPanel = document.getElementById('gameover-panel');
+const goTitle = document.getElementById('go-title');
+const goScore = document.getElementById('go-score');
+const goHighscore = document.getElementById('go-highscore');
+const newRecordEl = document.getElementById('new-record');
+const btnRestart = document.getElementById('btn-restart');
+const btnMenu = document.getElementById('btn-menu');
 
-        draw() {
-            ctx.save();
-            if (this.isSliding && !this.isJumping) {
-                // Dimensi saat Meluncur/Merunduk
-                const slideW = 90;
-                const slideH = 45;
-                const slideY = floorY - slideH;
-                
-                // Menggunakan imgOborSlide (atau fallback imgOborRun)
-                const imgToDraw = imgOborSlide.complete && imgOborSlide.naturalWidth !== 0 ? imgOborSlide : imgOborRun;
-                ctx.drawImage(imgToDraw, this.x, slideY, slideW, slideH);
-            } else {
-                // Dimensi Bulat Normal
-                const imgToDraw = imgOborRun.complete && imgOborRun.naturalWidth !== 0 ? imgOborRun : imgOborRun;
-                ctx.drawImage(imgToDraw, this.x, this.y, this.width, this.height);
-            }
-            ctx.restore();
-        },
+/* =========================================================
+   HIGH SCORE (localStorage)
+========================================================= */
+const HS_KEY = 'tabalong_highscore';
+function getHighScore(){
+  try { return parseInt(localStorage.getItem(HS_KEY), 10) || 0; }
+  catch(e){ return 0; }
+}
+function setHighScore(v){
+  try { localStorage.setItem(HS_KEY, String(v)); } catch(e){ /* ignore */ }
+}
+let highScore = getHighScore();
+menuHsValue.textContent = highScore;
+hudHighscore.textContent = highScore;
 
-        update() {
-            // Logika Fisika Lompatan
-            this.y += this.vy;
-            if (this.y + this.height < floorY) {
-                this.vy += this.gravity;
-                this.isJumping = true;
-            } else {
-                this.y = floorY - this.height;
-                this.vy = 0;
-                this.isJumping = false;
-            }
-        },
+/* =========================================================
+   STORY INTRO DATA
+========================================================= */
+const storyLines = [
+  { speaker:"Sesepuh Kota Tanjung", text:"Sebentar lagi Hari Jadi Tabalong tiba... namun Obor Pancasila di tugu kota mulai meredup." },
+  { speaker:"Sesepuh Kota Tanjung", text:"Angin dari lembah dan air yang deras telah mengguncang nyala api suci itu selama berhari-hari." },
+  { speaker:"Si Obor", text:"Aku, Si Obor, akan menempuh perjalanan dari Kota Tanjung, menembus Jalur Emas Hitam, hingga ke Gua Liang Tapah." },
+  { speaker:"Si Obor", text:"Di sana, aku akan menemukan sumber nyala yang akan menghidupkan kembali semangat Tabalong!" },
+  { speaker:"Sesepuh Kota Tanjung", text:"Berhati-hatilah, Obor. Air akan menguatkanmu, langsat akan menambah semangatmu, namun angin kencang akan memadamkanmu." },
+  { speaker:"Si Obor", text:"Aku siap. Demi Tabalong, nyala ini tidak boleh padam!" }
+];
+let storyIndex = 0;
 
-        jump() {
-            if (!this.isJumping && !this.isSliding) {
-                this.vy = this.jumpPower;
-            }
-        },
+function showStoryLine(){
+  const line = storyLines[storyIndex];
+  elStorySpeaker.textContent = line.speaker;
+  elStoryText.textContent = line.text;
+  btnContinue.textContent = (storyIndex === storyLines.length - 1) ? "Mulai!" : "Continue";
+}
 
-        setSlide(status) {
-            if (!this.isJumping) {
-                this.isSliding = status;
-            }
-        }
-    };
+function startIntro(){
+  gameState = STATE.INTRO;
+  storyIndex = 0;
+  elIntro.classList.remove('hidden');
+  elStoryDialogue.classList.remove('hidden');
+  elDifficulty.classList.add('hidden');
+  elHud.classList.add('hidden');
+  slideBtn.classList.add('hidden');
+  elTrivia.classList.add('hidden');
+  elGameOver.classList.add('hidden');
+  showStoryLine();
+  introParticles = spawnParticles(46);
+  introWaveTimer = 0;
+  introWaveT = 0;
+  introWaveActive = false;
+}
 
-    let obstacles = [];
-    let items = [];
+btnContinue.addEventListener('click', ()=>{
+  unlockAudio();
+  if (storyIndex < storyLines.length - 1){
+    storyIndex++;
+    showStoryLine();
+  } else {
+    goToDifficultyScreen();
+  }
+});
+btnSkip.addEventListener('click', ()=>{ unlockAudio(); goToDifficultyScreen(); });
 
-    /* =========================================================================
-       4. OBJEK RINTANGAN & ITEM
-       ========================================================================= */
-    class Obstacle {
-        constructor() {
-            this.isTop = Math.random() > 0.5; // true = rintangan atas (angin), false = bawah (air)
-            this.width = 65;
-            this.height = this.isTop ? 55 : 70;
-            this.x = canvas.width;
-            this.y = this.isTop ? floorY - 115 : floorY - this.height;
-        }
+function goToDifficultyScreen(){
+  gameState = STATE.DIFFICULTY;
+  elIntro.classList.add('hidden');
+  elStoryDialogue.classList.add('hidden');
+  elDifficulty.classList.remove('hidden');
+  menuHsValue.textContent = getHighScore();
+}
 
-        update() { this.x -= currentSpeed; }
-
-        draw() {
-            if (this.isTop) {
-                const img = imgAnginAtas.complete && imgAnginAtas.naturalWidth !== 0 ? imgAnginAtas : imgAirBawah;
-                ctx.drawImage(img, this.x, this.y, this.width, this.height);
-            } else {
-                ctx.drawImage(imgAirBawah, this.x, this.y, this.width, this.height);
-            }
-        }
-    }
-
-    class Item {
-        constructor(type) {
-            this.type = type; // 'langsat' atau 'minyak'
-            this.width = type === 'langsat' ? 50 : 45;
-            this.height = type === 'langsat' ? 50 : 45;
-            this.radius = 23;
-            this.x = canvas.width;
-            this.y = floorY - this.height - (Math.random() * 90);
-        }
-
-        update() { this.x -= currentSpeed; }
-
-        draw() {
-            if (this.type === 'langsat') {
-                ctx.drawImage(imgLangsat, this.x, this.y, this.width, this.height);
-            } else {
-                ctx.drawImage(imgMinyak, this.x, this.y, this.width, this.height);
-            }
-        }
-    }
-
-    /* =========================================================================
-       5. GAME MECHANICS & LEVEL MANAGEMENT
-       ========================================================================= */
-    function updateHealth(amount) {
-        health += amount;
-        if (health > 100) health = 100;
-        if (health <= 0) {
-            health = 0;
-            gameOver();
-        }
-        ui.healthBar.style.width = health + "%";
-        ui.healthText.innerText = health + "%";
-    }
-
-    function checkLevelProgression() {
-        // Level 1 -> Level 2 di skor 100
-        if (score >= 100 && currentLevel === 1) {
-            triggerLevelTransition(2, bgHutan, "Jalur Emas Hitam");
-        }
-        // Level 2 -> Level 3 di skor 200
-        else if (score >= 200 && currentLevel === 2) {
-            triggerLevelTransition(3, bgGua, "Wisata Gua Liang Tapah");
-        }
-    }
-
-    function triggerLevelTransition(nextLevel, nextBg, levelTitle) {
-        currentLevel = nextLevel;
-        activeBgImage = (nextBg.complete && nextBg.naturalWidth !== 0) ? nextBg : bgDefault;
-        ui.levelName.innerText = levelTitle;
-        currentSpeed += 1.5;
-
-        // Tampilkan Modal Trivia
-        isPaused = true;
-        ui.eduFactContent.innerHTML = TRIVIA_FACTS[nextLevel];
-        ui.eduScreen.classList.remove('hidden');
-    }
-
-    function drawBackground() {
-        if (isPlaying && !isPaused) {
-            bgX -= currentSpeed * 0.35;
-            if (bgX <= -canvas.width) bgX = 0;
-        }
-
-        const bgToDraw = (activeBgImage.complete && activeBgImage.naturalWidth !== 0) ? activeBgImage : bgDefault;
-        ctx.drawImage(bgToDraw, bgX, 0, canvas.width, canvas.height);
-        ctx.drawImage(bgToDraw, bgX + canvas.width, 0, canvas.width, canvas.height);
-
-        // Garis Tanah
-        ctx.fillStyle = '#ffb300';
-        ctx.fillRect(0, floorY, canvas.width, 4);
-    }
-
-    function manageObjects() {
-        let spawnRate = Math.max(50, 90 - (currentLevel * 10));
-
-        if (frames % spawnRate === 0) {
-            if (Math.random() < 0.55) {
-                obstacles.push(new Obstacle());
-            } else {
-                const itemType = Math.random() < 0.7 ? 'langsat' : 'minyak';
-                items.push(new Item(itemType));
-            }
-        }
-
-        // Loop Items
-        for (let i = items.length - 1; i >= 0; i--) {
-            let it = items[i];
-            it.update();
-            it.draw();
-
-            // Collision Check Player vs Item
-            let px = player.x + player.width / 2;
-            let py = player.y + player.height / 2;
-            let ix = it.x + it.width / 2;
-            let iy = it.y + it.height / 2;
-
-            if (Math.hypot(ix - px, iy - py) < it.radius + 30) {
-                if (it.type === 'langsat') {
-                    score += 10;
-                    ui.score.innerText = score;
-                    checkLevelProgression();
-                } else {
-                    updateHealth(15); // Tambah Nyawa
-                }
-                items.splice(i, 1);
-                continue;
-            }
-
-            if (it.x + it.width < 0) items.splice(i, 1);
-        }
-
-        // Loop Obstacles
-        for (let i = obstacles.length - 1; i >= 0; i--) {
-            let obs = obstacles[i];
-            obs.update();
-            obs.draw();
-
-            // Hitbox Player
-            let pX = player.x + 10;
-            let pY = player.isSliding ? floorY - 45 : player.y + 10;
-            let pW = player.isSliding ? 80 : player.width - 20;
-            let pH = player.isSliding ? 35 : player.height - 15;
-
-            if (
-                pX < obs.x + obs.width - 10 &&
-                pX + pW > obs.x + 10 &&
-                pY < obs.y + obs.height - 10 &&
-                pY + pH > obs.y + 10
-            ) {
-                updateHealth(-25); // Kurangi Nyawa
-                obstacles.splice(i, 1);
-                continue;
-            }
-
-            if (obs.x + obs.width < 0) obstacles.splice(i, 1);
-        }
-    }
-
-    /* =========================================================================
-       6. GAME LOOP & EVENT CONTROLLERS
-       ========================================================================= */
-    function gameLoop() {
-        if (!isPlaying) return;
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        drawBackground();
-
-        if (!isPaused) {
-            player.update();
-            manageObjects();
-
-            // Nyawa berkurang sedikit demi sedikit seiring waktu (Survival Mechanic)
-            if (frames % 90 === 0) {
-                updateHealth(-2);
-            }
-            frames++;
-        }
-
-        player.draw();
-        animationId = requestAnimationFrame(gameLoop);
-    }
-
-    function resetGame() {
-        score = 0;
-        health = 100;
-        frames = 0;
-        currentLevel = 1;
-        currentSpeed = baseSpeed;
-        bgX = 0;
-        obstacles = [];
-        items = [];
-        isPaused = false;
-        activeBgImage = (bgKota.complete && bgKota.naturalWidth !== 0) ? bgKota : bgDefault;
-
-        ui.score.innerText = score;
-        ui.levelName.innerText = "Kota Saraba Kawa";
-        updateHealth(0);
-    }
-
-    function startGame() {
-        resetGame();
-        isPlaying = true;
-        
-        ui.startScreen.classList.add('hidden');
-        ui.storyScreen.classList.add('hidden');
-        ui.gameOverScreen.classList.add('hidden');
-        ui.hud.classList.remove('hidden');
-
-        // Play BGM
-        bgm.play().catch(() => {});
-
-        gameLoop();
-    }
-
-    function gameOver() {
-        isPlaying = false;
-        cancelAnimationFrame(animationId);
-        bgm.pause();
-
-        ui.hud.classList.add('hidden');
-        ui.gameOverScreen.classList.remove('hidden');
-        ui.finalScore.innerText = score;
-    }
-
-    // Event Controllers Keyboard
-    window.addEventListener('keydown', (e) => {
-        if (e.code === 'Space' || e.code === 'ArrowUp') {
-            e.preventDefault();
-            if (isPlaying && !isPaused) player.jump();
-        }
-        if (e.code === 'ArrowDown') {
-            e.preventDefault();
-            if (isPlaying && !isPaused) player.setSlide(true);
-        }
+/* =========================================================
+   INTRO VISUAL: WALKING OBOR + EMBER PARTICLES
+========================================================= */
+let introParticles = [];
+function spawnParticles(n){
+  const arr = [];
+  for(let i=0;i<n;i++){
+    arr.push({
+      x: Math.random()*W,
+      y: Math.random()*H,
+      r: 1.2 + Math.random()*2.6,
+      speed: 0.3 + Math.random()*0.9,
+      drift: (Math.random()-0.5)*0.6,
+      hue: Math.random()<0.5 ? '255,190,61' : '255,122,24',
+      alpha: 0.4 + Math.random()*0.5
     });
+  }
+  return arr;
+}
+let introWalkX = -60;
+let introWaveT = 0;
+let introWaveTimer = 0;
+let introWaveActive = false;
+const INTRO_WAVE_INTERVAL = 2600;
+const INTRO_WAVE_DURATION = 900;
 
-    window.addEventListener('keyup', (e) => {
-        if (e.code === 'ArrowDown') {
-            if (isPlaying && !isPaused) player.setSlide(false);
-        }
-    });
+function updateIntroWave(dt){
+  const delta = Math.max(0, Math.min(dt || 16, 100));
+  introWaveTimer += delta;
+  if (!introWaveActive && introWaveTimer >= INTRO_WAVE_INTERVAL){
+    introWaveActive = true;
+    introWaveTimer = 0;
+  }
+  if (introWaveActive){
+    introWaveT += delta;
+    if (introWaveT >= INTRO_WAVE_DURATION){
+      introWaveActive = false;
+      introWaveT = 0;
+    }
+  }
+}
 
-    // Event Controllers Touch Screen (Mobile)
-    canvas.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        if (!isPlaying || isPaused) return;
+function drawIntroScene(dt){
+  updateIntroWave(dt);
+  // night gradient sky
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#0b1030'); g.addColorStop(0.6,'#141b45'); g.addColorStop(1,'#241a3a');
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,W,H);
 
-        const touchX = e.touches[0].clientX;
-        const screenWidth = window.innerWidth;
+  // silhouette hills
+  ctx.fillStyle = 'rgba(10,12,35,0.9)';
+  ctx.beginPath();
+  ctx.moveTo(0,H);
+  ctx.lineTo(0,H-140);
+  for(let x=0;x<=W;x+=60){
+    ctx.lineTo(x, H-140 - Math.sin(x*0.01)*30 - 20);
+  }
+  ctx.lineTo(W,H);
+  ctx.closePath();
+  ctx.fill();
 
-        if (touchX > screenWidth / 2) {
-            player.jump(); // Ketuk Kanan = Lompat
-        } else {
-            player.setSlide(true); // Ketuk Kiri = Meluncur
-        }
-    });
+  // ground line
+  ctx.fillStyle = '#0e1230';
+  ctx.fillRect(0,H-60,W,60);
 
-    canvas.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        if (isPlaying) player.setSlide(false);
-    });
+  // embers
+  introParticles.forEach(p=>{
+    p.y -= p.speed;
+    p.x += p.drift;
+    if (p.y < -10){ p.y = H+10; p.x = Math.random()*W; }
+    ctx.beginPath();
+    ctx.fillStyle = `rgba(${p.hue},${p.alpha})`;
+    ctx.shadowColor = `rgba(${p.hue},0.9)`;
+    ctx.shadowBlur = 8;
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fill();
+  });
+  ctx.shadowBlur = 0;
 
-    // UI Buttons Binding
-    document.getElementById('btnStart').addEventListener('click', () => {
-        ui.startScreen.classList.add('hidden');
-        ui.storyScreen.classList.remove('hidden');
-    });
+  // Si Obor stands near the center and periodically waves "dada-dada".
+  // The subtle sway/scale keeps the intro lively without adding expensive animation work.
+  const oborW = 112;
+  const oborH = 116;
+  const introX = W * 0.5 - oborW * 0.5;
+  const bob = Math.sin(performance.now() * 0.004) * 3;
+  const introY = H - 60 - oborH + bob;
+  const useWaveSprite = introWaveActive && imgReady(imgOborWave);
+  const wavePhase = introWaveActive ? introWaveT / INTRO_WAVE_DURATION : 0;
+  const waveTilt = introWaveActive ? Math.sin(wavePhase * Math.PI * 4) * 0.045 : 0;
+  const waveScale = introWaveActive ? 1 + Math.sin(wavePhase * Math.PI * 2) * 0.025 : 1;
+  const introImg = useWaveSprite ? imgOborWave : imgObor;
 
-    document.getElementById('btnStoryNext').addEventListener('click', startGame);
+  ctx.save();
+  ctx.translate(introX + oborW/2, introY + oborH/2);
+  ctx.rotate(waveTilt);
+  ctx.scale(waveScale, waveScale);
+  if (imgReady(introImg)){
+    ctx.drawImage(introImg, -oborW/2, -oborH/2, oborW, oborH);
+  } else {
+    ctx.fillStyle = '#ffbe3d';
+    ctx.shadowColor = 'rgba(255,150,30,0.9)';
+    ctx.shadowBlur = 18;
+    roundRect(ctx, -25, -35, 50, 70, 12);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.beginPath();
+    ctx.fillStyle = '#ff5c1a';
+    ctx.arc(0, -43, 12, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+function roundRect(c,x,y,w,h,r){
+  c.beginPath();
+  c.moveTo(x+r,y);
+  c.arcTo(x+w,y,x+w,y+h,r);
+  c.arcTo(x+w,y+h,x,y+h,r);
+  c.arcTo(x,y+h,x,y,r);
+  c.arcTo(x,y,x+w,y,r);
+  c.closePath();
+}
 
-    document.getElementById('btnEduNext').addEventListener('click', () => {
-        ui.eduScreen.classList.add('hidden');
-        isPaused = false;
-    });
+/* =========================================================
+   DIFFICULTY CONFIG
+========================================================= */
+const DIFFICULTIES = {
+  veryeasy:  { label:"Very Easy",  speed:3.2, spawnInterval:95,  healDrainScale:1.3 },
+  easy:      { label:"Easy",       speed:4.4, spawnInterval:78,  healDrainScale:1.0 },
+  hard:      { label:"Hard",       speed:6.0, spawnInterval:58,  healDrainScale:0.75 },
+  veryhard:  { label:"Very Hard",  speed:7.6, spawnInterval:42,  healDrainScale:0.55 }
+};
+let currentDifficulty = DIFFICULTIES.easy;
 
-    document.getElementById('btnRestart').addEventListener('click', startGame);
+document.querySelectorAll('.diff-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    currentDifficulty = DIFFICULTIES[btn.dataset.diff];
+    startGame();
+  });
+});
 
-    // Initial Drawing
-    player.y = floorY - player.height;
-    drawBackground();
-    player.draw();
+/* =========================================================
+   LEVELS
+========================================================= */
+const LEVELS = [
+  { name:"Kota Tanjung",       bg:imgBgKota,  length:3200, fallbackColor:['#1b3a5c','#0d1c33'] },
+  { name:"Jalur Emas Hitam",   bg:imgBgHutan, length:3400, fallbackColor:['#1a3320','#0c1a10'] },
+  { name:"Gua Liang Tapah",    bg:imgBgGua,   length:3600, fallbackColor:['#241626','#0d0710'] }
+];
+const TOTAL_DISTANCE = LEVELS.reduce((s,l)=>s+l.length,0);
 
+const TRIVIA_FACTS = [
+  "Tugu Obor Pancasila adalah salah satu ikon kebanggaan masyarakat Kabupaten Tabalong.",
+  "Kabupaten Tabalong terletak di ujung utara Provinsi Kalimantan Selatan.",
+  "Sungai Tabalong sejak dahulu menjadi jalur transportasi dan sumber kehidupan warga sekitar.",
+  "Buah langsat Tanjung dikenal sebagai salah satu hasil kebun unggulan daerah ini.",
+  "Wilayah Tabalong memiliki kekayaan alam yang menjadi salah satu penggerak perekonomian daerah.",
+  "Gua-gua alami di kawasan pegunungan Tabalong menyimpan banyak kisah dan legenda rakyat.",
+  "Hari Jadi Tabalong selalu dirayakan dengan penuh semangat kebersamaan oleh warganya.",
+  "Semangat gotong royong menjadi nilai penting yang terus dijaga masyarakat Tabalong hingga kini."
+];
+function randomTrivia(){
+  return TRIVIA_FACTS[Math.floor(Math.random()*TRIVIA_FACTS.length)];
+}
+
+/* =========================================================
+   PLAYER
+========================================================= */
+const PLAYER_W = 46, PLAYER_H = 54;
+let player = {
+  x: 140,
+  y: GROUND_Y - PLAYER_H,
+  w: PLAYER_W,
+  h: PLAYER_H,
+  vy: 0,
+  gravityDir: 1,   // 1 = normal (falls to floor), -1 = inverted (falls to ceiling)
+  sliding: false,
+  animT: 0
+};
+const GRAVITY = 0.62;
+const FLIP_KICK = 9;
+const MAX_VY = 14;
+
+function resetPlayer(){
+  player.x = 140;
+  player.gravityDir = 1;
+  player.y = GROUND_Y - PLAYER_H;
+  player.vy = 0;
+  player.sliding = false;
+  player.animT = 0;
+}
+
+function flipGravity(){
+  if (gameState !== STATE.PLAYING) return;
+  player.gravityDir *= -1;
+  player.vy = -player.gravityDir * FLIP_KICK;
+}
+
+function setSliding(v){
+  player.sliding = v;
+}
+
+function updatePlayer(){
+  player.animT += 1;
+  player.vy += GRAVITY * player.gravityDir;
+  if (player.vy > MAX_VY) player.vy = MAX_VY;
+  if (player.vy < -MAX_VY) player.vy = -MAX_VY;
+  player.y += player.vy;
+
+  const fullH = PLAYER_H;
+  const curH = player.sliding ? fullH/2 : fullH;
+  player.h = curH;
+
+  if (player.gravityDir === 1){
+    // anchored toward floor
+    const floorTop = GROUND_Y - curH;
+    if (player.y > floorTop){ player.y = floorTop; player.vy = 0; }
+    const ceilLimit = CEIL_Y;
+    if (player.y < ceilLimit){ player.y = ceilLimit; player.vy = 0; }
+  } else {
+    // anchored toward ceiling
+    const ceilTop = CEIL_Y;
+    if (player.y < ceilTop){ player.y = ceilTop; player.vy = 0; }
+    const floorLimit = GROUND_Y - curH;
+    if (player.y > floorLimit){ player.y = floorLimit; player.vy = 0; }
+  }
+}
+
+function drawPlayer(){
+  const img = player.sliding ? imgOborSlide : imgObor;
+  ctx.save();
+  if (player.gravityDir === -1){
+    ctx.translate(player.x + player.w/2, player.y + player.h/2);
+    ctx.rotate(Math.PI);
+    ctx.translate(-(player.w/2), -(player.h/2));
+    drawObor(img, 0, 0, player.w, player.h);
+  } else {
+    drawObor(img, player.x, player.y, player.w, player.h);
+  }
+  ctx.restore();
+}
+function drawObor(img,x,y,w,h){
+  if (imgReady(img)){
+    ctx.drawImage(img, x, y, w, h);
+  } else {
+    ctx.fillStyle = player.sliding ? '#ff9a4b' : '#ffbe3d';
+    ctx.shadowColor = 'rgba(255,150,30,0.85)';
+    ctx.shadowBlur = 14;
+    roundRect(ctx, x, y, w, h, 8);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.beginPath();
+    ctx.fillStyle = '#ff5c1a';
+    ctx.arc(x+w/2, y-4, 8, 0, Math.PI*2);
+    ctx.fill();
+  }
+}
+
+/* =========================================================
+   ENTITIES (object pool via filtering)
+========================================================= */
+let entities = [];
+let spawnTimer = 0;
+
+function spawnEntity(){
+  const roll = Math.random();
+  let type;
+  if (roll < 0.34) type = 'water';
+  else if (roll < 0.68) type = 'fruit';
+  else type = 'wind';
+
+  let e = { type, x: W + 20, vx: -currentDifficulty.speed };
+
+  if (type === 'water'){
+    e.w = 40; e.h = 34;
+    e.onFloor = Math.random() < 0.5;
+    e.y = e.onFloor ? GROUND_Y - e.h : CEIL_Y;
+  } else if (type === 'fruit'){
+    e.w = 30; e.h = 30;
+    const midTop = CEIL_Y + 60, midBottom = GROUND_Y - 60 - e.h;
+    e.y = midTop + Math.random()*(midBottom - midTop);
+    e.bobT = Math.random()*Math.PI*2;
+    e.baseY = e.y;
+  } else { // wind
+    e.w = 46; e.h = 34;
+    const topBand = CEIL_Y + 20, bottomBand = CEIL_Y + (GROUND_Y-CEIL_Y)*0.55;
+    e.y = topBand + Math.random()*(bottomBand-topBand);
+    e.bobT = Math.random()*Math.PI*2;
+    e.baseY = e.y;
+  }
+  entities.push(e);
+}
+
+function updateEntities(){
+  spawnTimer++;
+  if (spawnTimer >= currentDifficulty.spawnInterval){
+    spawnTimer = 0;
+    spawnEntity();
+  }
+  entities.forEach(e=>{
+    e.x += e.vx;
+    if (e.type === 'fruit'){
+      e.bobT += 0.06;
+      e.y = e.baseY + Math.sin(e.bobT)*8;
+    } else if (e.type === 'wind'){
+      e.bobT += 0.045;
+      e.y = e.baseY + Math.sin(e.bobT)*14;
+    }
+  });
+  // object pooling: strict filtering once entities clear left boundary
+  entities = entities.filter(e => e.x + e.w > -10);
+}
+
+function drawEntities(){
+  entities.forEach(e=>{
+    let img;
+    if (e.type === 'water') img = imgRintangan;
+    else if (e.type === 'fruit') img = imgLangsat;
+    else img = imgAngin;
+
+    if (imgReady(img)){
+      ctx.drawImage(img, e.x, e.y, e.w, e.h);
+    } else {
+      ctx.save();
+      if (e.type === 'water'){ ctx.fillStyle = '#3fb0ff'; ctx.shadowColor='rgba(63,176,255,0.8)'; }
+      else if (e.type === 'fruit'){ ctx.fillStyle = '#ffd166'; ctx.shadowColor='rgba(255,209,102,0.9)'; }
+      else { ctx.fillStyle = '#c8e8ff'; ctx.shadowColor='rgba(200,232,255,0.7)'; }
+      ctx.shadowBlur = 10;
+      if (e.type === 'fruit'){
+        ctx.beginPath(); ctx.arc(e.x+e.w/2, e.y+e.h/2, e.w/2, 0, Math.PI*2); ctx.fill();
+      } else {
+        roundRect(ctx, e.x, e.y, e.w, e.h, 8); ctx.fill();
+      }
+      ctx.restore();
+    }
+  });
+}
+
+/* =========================================================
+   COLLISION
+========================================================= */
+function rectsOverlap(a,b){
+  return a.x < b.x+b.w && a.x+a.w > b.x && a.y < b.y+b.h && a.y+a.h > b.y;
+}
+
+/* =========================================================
+   RUN STATE
+========================================================= */
+let score = 0;
+let health = 100;
+let distance = 0;
+let currentLevelIndex = 0;
+let pendingLevelIndex = 0;
+
+function startGame(){
+  if (bgmGame.paused){
+    const p = bgmGame.play();
+    if (p && typeof p.catch === 'function') p.catch(()=>{});
+  }
+  score = 0;
+  health = 100;
+  distance = 0;
+  currentLevelIndex = 0;
+  entities = [];
+  spawnTimer = 0;
+  resetPlayer();
+  gameState = STATE.PLAYING;
+
+  elDifficulty.classList.add('hidden');
+  elTrivia.classList.add('hidden');
+  elGameOver.classList.add('hidden');
+  elHud.classList.remove('hidden');
+  slideBtn.classList.remove('hidden');
+
+  updateHud();
+}
+
+function updateHud(){
+  hudScore.textContent = score;
+  hudHighscore.textContent = Math.max(highScore, score);
+  levelLabel.textContent = LEVELS[currentLevelIndex].name;
+  const pct = Math.min(100, (distance/TOTAL_DISTANCE)*100);
+  distanceFill.style.width = pct + '%';
+  healthFill.style.width = Math.max(0,health) + '%';
+}
+
+function levelStartDistance(idx){
+  let d=0; for(let i=0;i<idx;i++) d+=LEVELS[i].length; return d;
+}
+
+function updateGame(){
+  updatePlayer();
+  updateEntities();
+
+  distance += currentDifficulty.speed;
+
+  // level threshold check
+  const nextIdx = currentLevelIndex+1;
+  if (nextIdx < LEVELS.length && distance >= levelStartDistance(nextIdx)){
+    pendingLevelIndex = nextIdx;
+    triggerTrivia();
+    return;
+  }
+  if (distance >= TOTAL_DISTANCE){
+    triggerWin();
+    return;
+  }
+
+  // collisions
+  const hitbox = { x:player.x, y:player.y, w:player.w, h:player.h };
+  for (let i=entities.length-1;i>=0;i--){
+    const e = entities[i];
+    if (rectsOverlap(hitbox, e)){
+      if (e.type === 'water'){
+        playSfx(sfxWater);
+        health = Math.min(100, health + 15*currentDifficulty.healDrainScale);
+      } else if (e.type === 'fruit'){
+        playSfx(sfxLangsat);
+        score += 10;
+      } else if (e.type === 'wind'){
+        playSfx(sfxWind);
+        health = Math.max(0, health - 20*(2-currentDifficulty.healDrainScale));
+      }
+      entities.splice(i,1);
+      if (health <= 0){
+        triggerGameOver();
+        return;
+      }
+    }
+  }
+
+  updateHud();
+}
+
+function triggerTrivia(){
+  gameState = STATE.TRIVIA;
+  triviaText.textContent = randomTrivia();
+  elTrivia.classList.remove('hidden');
+}
+btnTriviaContinue.addEventListener('click', ()=>{
+  currentLevelIndex = pendingLevelIndex;
+  entities = [];
+  elTrivia.classList.add('hidden');
+  gameState = STATE.PLAYING;
+  updateHud();
+});
+
+function finalizeScoreAndShow(won){
+  bgmGame.pause();
+  try { bgmGame.currentTime = 0; } catch(e) {}
+  audioUnlocked = false;
+  elTrivia.classList.add('hidden');
+  const beat = score > highScore;
+  if (beat){ highScore = score; setHighScore(highScore); }
+  goTitle.textContent = won ? "Nyala Obor Menyala Kembali!" : "Api Padam...";
+  goPanel.classList.toggle('win', won);
+  goScore.textContent = score;
+  goHighscore.textContent = highScore;
+  newRecordEl.classList.toggle('hidden', !beat);
+  elHud.classList.add('hidden');
+  slideBtn.classList.add('hidden');
+  elGameOver.classList.remove('hidden');
+}
+
+function triggerGameOver(){
+  gameState = STATE.GAMEOVER;
+  finalizeScoreAndShow(false);
+}
+function triggerWin(){
+  gameState = STATE.WIN;
+  finalizeScoreAndShow(true);
+}
+
+btnRestart.addEventListener('click', ()=>{ startGame(); });
+btnMenu.addEventListener('click', ()=>{ goToDifficultyScreen(); });
+
+/* =========================================================
+   BACKGROUND DRAWING (per level, with parallax-ish fallback)
+========================================================= */
+let bgScrollX = 0;
+function drawLevelBackground(){
+  const lvl = LEVELS[currentLevelIndex];
+  bgScrollX -= currentDifficulty.speed*0.4;
+  if (imgReady(lvl.bg)){
+    const iw = lvl.bg.width, ih = lvl.bg.height;
+    const scale = H/ih;
+    const drawW = iw*scale;
+    let sx = bgScrollX % drawW; if (sx>0) sx -= drawW;
+    for (let x = sx; x < W; x += drawW){
+      ctx.drawImage(lvl.bg, x, 0, drawW, H);
+    }
+  } else {
+    const g = ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0, lvl.fallbackColor[0]);
+    g.addColorStop(1, lvl.fallbackColor[1]);
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,W,H);
+    // simple parallax silhouette shapes
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    for(let i=0;i<5;i++){
+      const bx = ((bgScrollX*0.5)+i*220) % (W+220) - 110;
+      ctx.beginPath();
+      ctx.ellipse(bx, H-90, 140, 60, 0, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+  // floor / ceiling strips for readability
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.fillRect(0, GROUND_Y+ (PLAYER_H/2), W, H-(GROUND_Y+(PLAYER_H/2)));
+  ctx.fillRect(0, 0, W, CEIL_Y-24 > 0 ? CEIL_Y-24 : 0);
+}
+
+/* =========================================================
+   MAIN LOOP
+========================================================= */
+let lastTime = 0;
+function loop(ts){
+  const dt = ts - lastTime; lastTime = ts;
+
+  if (gameState === STATE.INTRO){
+    drawIntroScene(dt);
+  } else if (gameState === STATE.DIFFICULTY){
+    drawIntroScene(dt); // keep ambient scene behind difficulty menu
+  } else if (gameState === STATE.PLAYING){
+    drawLevelBackground();
+    updateGame();
+    drawEntities();
+    drawPlayer();
+  } else if (gameState === STATE.TRIVIA){
+    drawLevelBackground();
+    drawEntities();
+    drawPlayer();
+  } else if (gameState === STATE.GAMEOVER || gameState === STATE.WIN){
+    drawLevelBackground();
+    drawEntities();
+    drawPlayer();
+  }
+
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* =========================================================
+   INPUT HANDLING
+========================================================= */
+function handlePrimaryTap(ev){
+  // Never let canvas input interfere with Game Over / Win overlay buttons.
+  if (gameState === STATE.GAMEOVER || gameState === STATE.WIN) return;
+  if (gameState === STATE.PLAYING){
+    flipGravity();
+  }
+}
+canvas.addEventListener('mousedown', handlePrimaryTap);
+canvas.addEventListener('touchstart', (e)=>{ e.preventDefault(); handlePrimaryTap(e); }, {passive:false});
+
+window.addEventListener('keydown', (e)=>{
+  if (e.code === 'Space'){
+    e.preventDefault();
+    flipGravity();
+  } else if (e.code === 'ArrowDown'){
+    e.preventDefault();
+    setSliding(true);
+  }
+});
+window.addEventListener('keyup', (e)=>{
+  if (e.code === 'ArrowDown'){
+    setSliding(false);
+  }
+});
+
+slideBtn.addEventListener('pointerdown', (e)=>{ e.preventDefault(); setSliding(true); });
+slideBtn.addEventListener('pointerup', (e)=>{ e.preventDefault(); setSliding(false); });
+slideBtn.addEventListener('pointerleave', (e)=>{ setSliding(false); });
+slideBtn.addEventListener('touchstart', (e)=>{ e.preventDefault(); setSliding(true); }, {passive:false});
+slideBtn.addEventListener('touchend', (e)=>{ e.preventDefault(); setSliding(false); }, {passive:false});
+
+/* =========================================================
+   INIT
+========================================================= */
+startIntro();
+
+})();
 </script>
 </body>
 </html>
