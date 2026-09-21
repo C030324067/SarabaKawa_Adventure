@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Saraba Kawa Adventure - Hari Jadi Tabalong</title>
+    <style>
+        /* CSS: Styling dan Antarmuka (UI) */
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Poppins:wght@400;600;700&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none; /* Mencegah seleksi teks saat tap di mobile */
+            -webkit-touch-callout: none;
+        }
+
+        body {
+            background-color: #1e1e2f;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden; /* Mencegah scroll */
+        }
+
+        #gameWrapper {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            aspect-ratio: 2 / 1; /* Rasio standar 2D side-scroller */
+            background: linear-gradient(to bottom, #2b5876, #4e4376);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Heads Up Display (HUD) */
+        #hud {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .score-box {
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.2rem;
+            border: 2px solid #ffca28;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        /* Overlay Layar (Menu & Game Over) */
+        .screen {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(20, 20, 30, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 20;
+            padding: 20px;
+            transition: opacity 0.3s ease;
+        }
+
+        .screen.hidden {
+            display: none !important;
+        }
+
+        h1 {
+            font-family: 'Fredoka One', cursive;
+            color: #ffb300;
+            font-size: 2.8rem;
+            text-shadow: 3px 3px 0px #d84315, 6px 6px 0px #000;
+            margin-bottom: 5px;
+            line-height: 1.1;
+        }
+
+        h2 {
+            color: #fff;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px #000;
+        }
+
+        .high-score-text {
+            color: #4fc3f7;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            background: rgba(0,0,0,0.6);
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #ff8f00, #ff6f00);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            font-family: 'Fredoka One', cursive;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 6px 0px #e65100, 0 10px 10px rgba(0,0,0,0.3);
+            transition: transform 0.1s, box-shadow 0.1s;
+            margin-top: 15px;
+        }
+
+        button:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0px #e65100, 0 4px 5px rgba(0,0,0,0.3);
+        }
+
+        /* Animasi Rekor Baru */
+        .blinking {
+            animation: blinker 0.8s linear infinite;
+            color: #69f0ae;
+            font-size: 1.4rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00e676;
+            margin-bottom: 10px;
+        }
+
+        @keyframes blinker {
+            50% { opacity: 0; }
+        }
+
+        /* Kotak Fakta Edukasi */
+        .fact-box {
+            background: #fff;
+            color: #333;
+            max-width: 80%;
+            padding: 15px 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 8px solid #ffb300;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            font-size: 0.95rem;
+        }
+
+        .fact-box h3 {
+            color: #ff6f00;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 2rem; text-shadow: 2px 2px 0px #d84315, 4px 4px 0px #000; }
+            h2 { font-size: 0.9rem; }
+            button { font-size: 1.2rem; padding: 12px 30px; }
+            .score-box { font-size: 1rem; padding: 5px 10px; }
+            .fact-box { font-size: 0.85rem; max-width: 95%; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="gameWrapper">
+    <!-- HUD: Tampil saat bermain -->
+    <div id="hud" class="hidden">
+        <div class="score-box">Skor: <span id="currentScore">0</span></div>
+        <div class="score-box">Tertinggi: <span id="hudHighScore">0</span></div>
+    </div>
+
+    <!-- Area Render Game -->
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
+
+    <!-- Menu Utama -->
+    <div id="startScreen" class="screen">
+        <h1>SARABA KAWA ADVENTURE</h1>
+        <h2>Spesial Hari Jadi Kabupaten Tabalong</h2>
+        <div class="high-score-text">🏆 Skor Tertinggi Saat Ini: <span id="menuHighScore">0</span></div>
+        <p style="color:#fff; font-size:0.9rem; margin-bottom:15px; background: rgba(0,0,0,0.5); padding:10px; border-radius:8px;">
+            <b>CARA BERMAIN:</b><br>
+            Bantu Si Obor mengumpulkan Langsat Tanjung (+10 Skor).<br>
+            Tekan <b>SPASI</b> atau <b>SENTUH LAYAR</b> untuk berjalan terbalik di langit-langit.<br>
+            Hindari semburan air agar apimu tidak padam!
+        </p>
+        <button id="startBtn">MULAI GAME</button>
+    </div>
+
+    <!-- Layar Game Over -->
+    <div id="gameOverScreen" class="screen hidden">
+        <h1>GAME OVER</h1>
+        <p id="newRecordMsg" class="hidden blinking">🎉 REKOR BARU TERCIPTA! 🎉</p>
+        <div style="color:white; font-size:1.2rem; margin-bottom:10px;">Skor Akhir: <span id="finalScore" style="font-weight:bold; color:#ffb300; font-size:1.5rem;">0</span></div>
+        
+        <div class="fact-box">
+            <h3>💡 Fakta Tabalong</h3>
+            <p id="randomFact"></p>
+        </div>
+        
+        <button id="restartBtn">MAIN LAGI</button>
+    </div>
+</div>
+
+<script>
+    /* =========================================
+       JavaScript: Logika Game & Canvas HTML5
+       ========================================= */
+
+    // Referensi Elemen DOM
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    const ui = {
+        hud: document.getElementById('hud'),
+        startScreen: document.getElementById('startScreen'),
+        gameOverScreen: document.getElementById('gameOverScreen'),
+        currentScore: document.getElementById('currentScore'),
+        hudHighScore: document.getElementById('hudHighScore'),
+        menuHighScore: document.getElementById('menuHighScore'),
+        finalScore: document.getElementById('finalScore'),
+        newRecordMsg: document.getElementById('newRecordMsg'),
+        randomFact: document.getElementById('randomFact'),
+        startBtn: document.getElementById('startBtn'),
+        restartBtn: document.getElementById('restartBtn')
+    };
+
+    // Data Fakta Edukasi Kabupaten Tabalong
+    const tabalongFacts = [
+        "Semboyan 'Saraba Kawa' bermakna serba bisa atau sanggup melaksanakan segala hal yang baik demi kemajuan daerah.",
+        "Monumen Tanjung Puri (Tugu Obor) di Mabu'un adalah ikon Tabalong. Apinya melambangkan semangat warga yang pantang menyerah.",
+        "Buah Langsat Tanjung adalah buah lokal khas Tabalong yang sangat manis dan menjadi kebanggaan masyarakat setempat.",
+        "Gua Liang Tapah merupakan salah satu wisata alam memukau di Tabalong yang menyajikan pemandangan stalaktit dan stalagmit.",
+        "Pemerintah Kabupaten Tabalong melaksanakan Launching Aplikasi PIKAD dan Ekspose Halo Tabalong, dengan Bupati saat ini Ir. H. M. Noor Rifani, S.H., S.T., M.T. dan Wakil Bupati Habib M. Taufani Alkaf, S.Kom., M.M.",
+        "Kabupaten Tabalong yang beribukota di Tanjung merupakan kabupaten paling utara di Provinsi Kalimantan Selatan."
+    ];
+
+    // Konstanta & Variabel Global Game
+    let isPlaying = false;
+    let animationId;
+    let score = 0;
+    let highScore = localStorage.getItem('tabalong_highscore') || 0;
+    
+    let frames = 0;
+    let baseSpeed = 5;
+    let currentSpeed = baseSpeed;
+    let difficultyLevel = 0; // Bertambah setiap kelipatan 50 skor
+
+    // Batas lantai bawah dan langit-langit atas
+    const floorY = canvas.height - 40; // 360
+    const ceilY = 40;                  // 40
+
+    // Update tampilan high score awal di menu
+    ui.menuHighScore.innerText = highScore;
+
+    /* --- CLASS ENTITAS GAME --- */
+
+    // 1. Karakter Utama: Si Obor
+    const player = {
+        x: 100,
+        y: floorY,
+        width: 34,
+        height: 44,
+        isUpsideDown: false,
+        
+        draw() {
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            
+            // Logika Anti-Gravitasi (Memutar visual karakter jika di atas)
+            if (this.isUpsideDown) {
+                // Jika di langit-langit, posisikan poros ke bawah karakter lalu flip
+                ctx.translate(0, this.height);
+                ctx.scale(1, -1);
+            }
+
+            // Render Visual Karakter "Si Obor" (Menggunakan Canvas Path)
+            // Tubuh Api Luar (Oranye/Merah)
+            ctx.beginPath();
+            ctx.moveTo(this.width / 2, 0); // Ujung atas api
+            ctx.quadraticCurveTo(this.width, this.height * 0.7, this.width / 2, this.height); // Kanan ke bawah
+            ctx.quadraticCurveTo(0, this.height * 0.7, this.width / 2, 0); // Kiri kembali ke atas
+            ctx.fillStyle = '#ff5722';
+            ctx.fill();
+
+            // Inti Api Dalam (Kuning)
+            ctx.beginPath();
+            ctx.moveTo(this.width / 2, this.height * 0.3);
+            ctx.quadraticCurveTo(this.width * 0.8, this.height * 0.8, this.width / 2, this.height * 0.95);
+            ctx.quadraticCurveTo(this.width * 0.2, this.height * 0.8, this.width / 2, this.height * 0.3);
+            ctx.fillStyle = '#ffeb3b';
+            ctx.fill();
+            
+            // Mata Karakter (Kesan Cute/Friendly)
+            ctx.fillStyle = '#212121';
+            ctx.beginPath(); ctx.arc(this.width*0.35, this.height*0.7, 3, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(this.width*0.65, this.height*0.7, 3, 0, Math.PI*2); ctx.fill();
+
+            ctx.restore();
+        },
+
+        flipGravity() {
+            if (!isPlaying) return;
+            this.isUpsideDown = !this.isUpsideDown;
+            this.y = this.isUpsideDown ? ceilY : floorY - this.height;
+        }
+    };
+
+    // Array Penyimpanan Rintangan dan Item
+    let obstacles = [];
+    let items = [];
+
+    // 2. Rintangan (Semburan Air / Kotak Biru)
+    class Obstacle {
+        constructor() {
+            this.width = 40;
+            this.height = Math.random() > 0.5 ? 45 : 60; // Tinggi acak
+            this.x = canvas.width;
+            this.isTop = Math.random() > 0.5; // Muncul di langit-langit (true) atau lantai (false)
+            this.y = this.isTop ? ceilY : floorY - this.height;
+        }
+
+        update() {
+            this.x -= currentSpeed;
+        }
+
+        draw() {
+            // Gambar kotak biru dengan aksen ombak sederhana
+            ctx.fillStyle = '#29b6f6';
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+            
+            // Garis dalam (highlight)
+            ctx.strokeStyle = '#03a9f4';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(this.x, this.y, this.width, this.height);
+        }
+    }
+
+    // 3. Item (Buah Langsat Tanjung / Koin Kuning)
+    class Item {
+        constructor() {
+            this.radius = 15;
+            this.x = canvas.width + 20;
+            this.isTop = Math.random() > 0.5;
+            // Posisikan sedikit melayang agar mudah diambil
+            this.y = this.isTop ? ceilY + this.radius + 15 : floorY - this.radius - 15;
+        }
+
+        update() {
+            this.x -= currentSpeed;
+        }
+
+        draw() {
+            // Gambar koin kuning / langsat
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fillStyle = '#fdd835';
+            ctx.fill();
+            
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#fbc02d';
+            ctx.stroke();
+
+            // Efek kilau dalam koin
+            ctx.beginPath();
+            ctx.arc(this.x - 4, this.y - 4, 4, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255,255,255,0.6)';
+            ctx.fill();
+        }
+    }
+
+    /* --- LOGIKA PERMAINAN (SYSTEMS) --- */
+
+    function drawBackground() {
+        // Area Langit-langit
+        ctx.fillStyle = '#37474f';
+        ctx.fillRect(0, 0, canvas.width, ceilY);
+        // Garis batas langit-langit
+        ctx.fillStyle = '#263238';
+        ctx.fillRect(0, ceilY, canvas.width, 10);
+
+        // Area Lantai Bawah
+        ctx.fillStyle = '#4e342e';
+        ctx.fillRect(0, floorY, canvas.width, canvas.height - floorY);
+        // Garis batas lantai
+        ctx.fillStyle = '#3e2723';
+        ctx.fillRect(0, floorY - 10, canvas.width, 10);
+    }
+
+    function manageEntities() {
+        // Interval Spawn Rintangan/Item semakin cepat seiring level
+        let spawnRate = Math.max(60, 100 - (difficultyLevel * 5)); 
+
+        if (frames % spawnRate === 0) {
+            // 60% peluang rintangan, 40% peluang item
+            if (Math.random() < 0.6) {
+                obstacles.push(new Obstacle());
+            } else {
+                items.push(new Item());
+            }
+        }
+
+        // Loop Update & Render Items (dari belakang ke depan untuk amannya penghapusan array)
+        for (let i = items.length - 1; i >= 0; i--) {
+            let item = items[i];
+            item.update();
+            item.draw();
+
+            // Deteksi Tabrakan Sederhana (Circle to AABB Box Player)
+            // Memanfaatkan jarak titik pusat item ke titik pusat visual player
+            let px = player.x + player.width / 2;
+            let py = player.y + player.height / 2;
+            
+            let dist = Math.hypot(item.x - px, item.y - py);
+            
+            if (dist < item.radius + (player.width / 2)) {
+                // Item Terambil
+                score += 10;
+                ui.currentScore.innerText = score;
+                items.splice(i, 1);
+                
+                // Sistem Kesulitan: Naik level kecepatan tiap kelipatan 50 skor
+                let newLevel = Math.floor(score / 50);
+                if (newLevel > difficultyLevel) {
+                    difficultyLevel = newLevel;
+                    currentSpeed = baseSpeed + (difficultyLevel * 0.8);
+                }
+                continue;
+            }
+
+            // Hapus jika keluar layar kiri
+            if (item.x + item.radius < 0) {
+                items.splice(i, 1);
+            }
+        }
+
+        // Loop Update & Render Rintangan
+        for (let i = obstacles.length - 1; i >= 0; i--) {
+            let obs = obstacles[i];
+            obs.update();
+            obs.draw();
+
+            // Deteksi Tabrakan Rintangan (AABB Collision Hitbox)
+            if (
+                player.x < obs.x + obs.width &&
+                player.x + player.width > obs.x &&
+                player.y < obs.y + obs.height &&
+                player.y + player.height > obs.y
+            ) {
+                gameOver();
+            }
+
+            if (obs.x + obs.width < 0) {
+                obstacles.splice(i, 1);
+            }
+        }
+    }
+
+    /* --- PENGENDALIAN GAME & SIKLUS (LIFECYCLE) --- */
+
+    function resetGame() {
+        score = 0;
+        difficultyLevel = 0;
+        currentSpeed = baseSpeed;
+        frames = 0;
+        obstacles = [];
+        items = [];
+        
+        player.isUpsideDown = false;
+        player.y = floorY - player.height;
+
+        ui.currentScore.innerText = score;
+        ui.hudHighScore.innerText = highScore;
+        ui.newRecordMsg.classList.add('hidden');
+    }
+
+    function startGame() {
+        resetGame();
+        isPlaying = true;
+        
+        ui.startScreen.classList.add('hidden');
+        ui.gameOverScreen.classList.add('hidden');
+        ui.hud.classList.remove('hidden');
+
+        gameLoop();
+    }
+
+    function gameOver() {
+        isPlaying = false;
+        cancelAnimationFrame(animationId);
+        
+        ui.hud.classList.add('hidden');
+        ui.gameOverScreen.classList.remove('hidden');
+        ui.finalScore.innerText = score;
+
+        // Cek dan Simpan Skor Tertinggi (High Score) menggunakan localStorage
+        if (score > highScore) {
+            highScore = score;
+            localStorage.setItem('tabalong_highscore', highScore);
+            ui.newRecordMsg.classList.remove('hidden'); // Tampilkan teks rekor baru
+        }
+        ui.menuHighScore.innerText = highScore;
+
+        // Tampilkan Fakta Edukasi Acak
+        const randIndex = Math.floor(Math.random() * tabalongFacts.length);
+        ui.randomFact.innerText = tabalongFacts[randIndex];
+    }
+
+    function gameLoop() {
+        if (!isPlaying) return;
+
+        // Bersihkan canvas setiap frame
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        drawBackground();
+        manageEntities();
+        player.draw();
+
+        frames++;
+        animationId = requestAnimationFrame(gameLoop);
+    }
+
+    /* --- EVENT LISTENER (INPUT KENDALI) --- */
+
+    // Kendali Keyboard (Spasi)
+    window.addEventListener('keydown', (e) => {
+        if (e.code === 'Space') {
+            e.preventDefault(); // Cegah scrolling browser
+            if (isPlaying) player.flipGravity();
+        }
+    });
+
+    // Kendali Layar Sentuh (Mobile-Friendly)
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (isPlaying) player.flipGravity();
+    });
+
+    // Kendali Klik Mouse (Desktop alternative)
+    canvas.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        if (isPlaying) player.flipGravity();
+    });
+
+    // Event Tombol UI
+    ui.startBtn.addEventListener('click', startGame);
+    ui.restartBtn.addEventListener('click', startGame);
+
+    // Render layar kosong (inisiasi grafik awal saat website baru dibuka)
+    player.y = floorY - player.height;
+    drawBackground();
+    player.draw();
+
+</script>
+</body>
+</html>
