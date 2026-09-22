@@ -2,7 +2,11 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0b0e24">
 <title>Saraba Kawa Adventure — Platformer Anniversary Edition</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;700;900&display=swap');
@@ -29,6 +33,9 @@
     color:var(--clr-text);
     overflow:hidden;
     -webkit-tap-highlight-color:transparent;
+    -webkit-touch-callout:none;
+    overscroll-behavior:none;
+    touch-action:none;
     user-select:none;
   }
 
@@ -37,16 +44,21 @@
   #game-wrap{
     position:relative;
     width:100vw;height:100vh;
+    height:100dvh; /* more accurate on mobile browsers with dynamic toolbars; ignored where unsupported */
     display:flex;align-items:center;justify-content:center;
+    touch-action:none;
+    overscroll-behavior:none;
   }
 
   #stage{
     position:relative;
-    width:min(96vw, 960px);
+    width:min(96vw, 960px, calc(92vh * 16 / 9));
+    width:min(96vw, 960px, calc(92dvh * 16 / 9)); /* keeps the 16:9 stage fully on-screen on short mobile viewports too */
     aspect-ratio: 960/540;
     background:#000;
     border-radius:18px;
     overflow:hidden;
+    touch-action:none;
     box-shadow:0 0 0 3px rgba(255,209,102,.35), 0 0 40px rgba(255,122,24,.35), 0 20px 60px rgba(0,0,0,.6);
   }
 
@@ -452,13 +464,90 @@
     color:var(--clr-teal);
   }
 
+  /* ---- Rotate-device prompt (mobile portrait) ---- */
+  #rotate-prompt{
+    display:none;
+    position:fixed;inset:0;
+    z-index:100;
+    flex-direction:column;
+    align-items:center;justify-content:center;
+    gap:14px;
+    background:radial-gradient(ellipse at top, #1a2352 0%, #0b0e24 60%, #06071a 100%);
+    text-align:center;
+    padding:24px;
+  }
+  #rotate-prompt .rotate-icon{
+    font-size:56px;
+    animation:rotateHint 1.6s ease-in-out infinite;
+  }
+  @keyframes rotateHint{
+    0%,100%{ transform:rotate(0deg); }
+    50%{ transform:rotate(90deg); }
+  }
+  #rotate-prompt h2{
+    margin:0;
+    font-size:clamp(18px,5vw,26px);
+    color:var(--clr-gold);
+    text-shadow:0 0 10px rgba(255,209,102,.7);
+  }
+  #rotate-prompt p{
+    margin:0;
+    max-width:320px;
+    font-size:clamp(13px,3.6vw,16px);
+    color:#ffe9c2;
+    opacity:.9;
+  }
+
+  /* Small phones held in portrait: the 16:9 stage becomes too cramped to
+     play comfortably, so ask the player to rotate to landscape instead. */
+  @media (orientation:portrait) and (max-width:900px){
+    #game-wrap{ display:none; }
+    #rotate-prompt{ display:flex; }
+  }
+
+  /* ---- Touch-target & safe-area tweaks for phones (mostly landscape) ---- */
+  @media (max-width:900px){
+    #controls-left{
+      left:max(16px, env(safe-area-inset-left, 0px));
+      bottom:max(14px, env(safe-area-inset-bottom, 0px));
+    }
+    #controls-right{
+      right:max(16px, env(safe-area-inset-right, 0px));
+      bottom:max(14px, env(safe-area-inset-bottom, 0px));
+    }
+    #hud{
+      padding-left:max(14px, env(safe-area-inset-left, 0px));
+      padding-right:max(14px, env(safe-area-inset-right, 0px));
+      padding-top:max(10px, env(safe-area-inset-top, 0px));
+    }
+    #btn-skip-intro{
+      top:max(14px, env(safe-area-inset-top, 0px));
+      right:max(14px, env(safe-area-inset-right, 0px));
+    }
+  }
+
   @media (max-width:520px){
     .ctrl-btn{width:54px;height:54px;font-size:18px;}
     #btn-jump{width:68px;height:68px;font-size:11px;}
   }
+
+  /* Short landscape phones (e.g. iPhone SE ~320px tall): shrink controls
+     further so they never overlap the HUD bars above them. */
+  @media (max-height:400px) and (orientation:landscape){
+    .ctrl-btn{width:46px;height:46px;font-size:16px;}
+    #btn-jump{width:58px;height:58px;font-size:10px;}
+    #controls-left, #controls-right{ bottom:max(8px, env(safe-area-inset-bottom, 0px)); }
+  }
 </style>
 </head>
 <body>
+<!-- ROTATE-DEVICE PROMPT (shown only on small portrait screens via CSS) -->
+<div id="rotate-prompt">
+  <div class="rotate-icon">📱</div>
+  <h2>Putar HP-mu ke Mode Landscape</h2>
+  <p>Saraba Kawa Adventure dimainkan paling nyaman dalam posisi mendatar (landscape). Putar perangkatmu untuk mulai bermain! 🔥</p>
+</div>
+
 <div id="game-wrap">
   <div id="stage">
     <canvas id="gameCanvas" width="960" height="540"></canvas>
@@ -912,10 +1001,10 @@ const GROUND_H   = 120;      // ground block thickness (extends past canvas bott
 
 function seg(x,w){ return { x:x, y:GROUND_TOP, w:w, h:GROUND_H, solid:true, kind:'ground' }; }
 function plat(x,y,w){ return { x:x, y:y, w:w, h:20, solid:true, kind:'float' }; }
-function fruit(x,y){ return { type:'fruit', x:x, y:y-34, w:34, h:34, collected:false }; }
-function water(x,y){ return { type:'water', x:x, y:y-34, w:40, h:34, collected:false }; }
+function fruit(x,y){ return { type:'fruit', x:x, y:y-40, w:40, h:40, collected:false }; }
+function water(x,y){ return { type:'water', x:x, y:y-40, w:48, h:40, collected:false }; }
 function wind(baseY,rMin,rMax,spd){
-  return { type:'wind', x:rMin, y:baseY, w:56, h:50, rMin:rMin, rMax:rMax, speed:spd, dir:1 };
+  return { type:'wind', x:rMin, y:baseY, w:64, h:58, rMin:rMin, rMax:rMax, speed:spd, dir:1 };
 }
 function finishLine(x){ return { x:x, y:270, w:18, h:190 }; }
 
@@ -1004,6 +1093,25 @@ const LEVELS = [
     finish: finishLine(2450)
   }
 ];
+
+/* ---------------------------------------------------------
+   ADJUSTMENT: bring the floating platforms (balok) down a
+   bit — they were floating too high above the ground.
+   Ground segments (kind:'ground') and ground-level items are
+   left untouched; only floating platforms + the fruits sitting
+   on top of them are shifted down together so items stay
+   correctly placed on their platform.
+--------------------------------------------------------- */
+const PLATFORM_LOWER_OFFSET = 55;
+LEVELS.forEach(lvl=>{
+  lvl.platforms.forEach(p=>{
+    if (p.kind === 'float') p.y += PLATFORM_LOWER_OFFSET;
+  });
+  lvl.fruits.forEach(f=>{
+    const originalTopY = f.y + f.h; // fruit(x,y) stores y-34, so +34(=f.h) recovers the reference y
+    if (originalTopY !== GROUND_TOP) f.y += PLATFORM_LOWER_OFFSET; // only fruits that sit on a floating platform
+  });
+});
 
 const TRIVIA_FACTS = [
   "Tugu Obor Pancasila adalah salah satu ikon kebanggaan masyarakat Kabupaten Tabalong.",
@@ -1122,7 +1230,7 @@ function updatePlayer(){
 function drawPlayer(){
   const img = gambarObor;
   ctx.save();
-  const visualW = 54, visualH = 66;
+  const visualW = 72, visualH = 88;
   const drawX = player.x + (player.w - visualW)/2;
   const drawY = player.y + (player.h - visualH);
   const flashing = invulnTimer > 0 && Math.floor(invulnTimer/4)%2===0;
@@ -1540,6 +1648,19 @@ btnJump.addEventListener('touchstart', (e)=>{ e.preventDefault(); unlockAudio();
 
 canvas.addEventListener('mousedown', unlockAudio);
 canvas.addEventListener('touchstart', unlockAudio, {passive:true});
+
+/* Mobile: stop the page itself from scrolling/bouncing (pull-to-refresh,
+   rubber-band, pinch-zoom) while the player drags a finger across the
+   screen or the on-screen controls. Individual control buttons already
+   call preventDefault() on their own touchstart/touchend above; this is
+   a page-wide safety net for touchmove. */
+document.addEventListener('touchmove', (e)=>{ e.preventDefault(); }, {passive:false});
+document.addEventListener('gesturestart', (e)=>{ e.preventDefault(); }); // iOS Safari pinch-zoom
+window.addEventListener('orientationchange', ()=>{
+  // give the browser a beat to settle the new viewport size, then let CSS
+  // (aspect-ratio + dvh-based width) re-layout the stage automatically
+  setTimeout(()=>{ window.scrollTo(0,0); }, 60);
+});
 
 /* =========================================================
    INIT
