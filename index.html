@@ -55,6 +55,7 @@
     width:100%;height:100%;
     display:block;
     image-rendering:optimizeQuality;
+    z-index:1;
   }
 
   .overlay{
@@ -65,6 +66,7 @@
     background:linear-gradient(180deg, rgba(6,7,26,.55), rgba(6,7,26,.85));
     backdrop-filter:blur(1.5px);
     z-index:20;
+    pointer-events:auto;
   }
   .hidden{display:none !important;}
 
@@ -411,13 +413,25 @@
   #trivia-box p{font-size:clamp(12px,1.7vw,15px);line-height:1.5;margin:0 0 16px 0;}
 
   /* ---- Game over ---- */
+  #screen-gameover{
+    z-index:30; /* sit above every other overlay/HUD layer so it is always clickable */
+    pointer-events:auto;
+  }
   #gameover-panel{
+    position:relative;
+    z-index:1;
+    pointer-events:auto;
     max-width:min(90%,480px);
     background:linear-gradient(180deg,var(--clr-panel-light),var(--clr-panel));
     border:2px solid rgba(255,61,61,.55);
     border-radius:18px;
     padding:24px;
     box-shadow:0 0 30px rgba(255,61,61,.35);
+  }
+  #gameover-panel .go-btn-row .btn{
+    position:relative;
+    z-index:1;
+    pointer-events:auto;
   }
   #gameover-panel.win{border-color:rgba(255,209,102,.7);box-shadow:0 0 30px rgba(255,209,102,.4);}
   #go-title{margin:0 0 6px 0;}
@@ -502,7 +516,7 @@
     <div id="hud" class="hidden">
       <div id="hud-top-row">
         <div class="hud-chip">🔥 Skor: <span id="hud-score">0</span></div>
-        <div id="level-label">Kota Tanjung</div>
+        <div id="level-label">Gua Liang Tapah</div>
         <div class="hud-chip">🏆 <span id="hud-highscore">0</span></div>
       </div>
       <div id="distance-bar-track"><div id="distance-bar-fill"></div><div id="distance-flag">🏁</div></div>
@@ -585,6 +599,26 @@ function playSfx(sfx){
   } catch(e){ /* ignore */ }
 }
 function imgReady(im){ return im.complete && im.naturalWidth > 0; }
+
+/* Draws an image "contain"-style inside the given box (boxW x boxH) so the
+   sprite's ORIGINAL aspect ratio is always preserved — it is scaled down to
+   fit inside the box and centered, instead of being stretched to fill it.
+   align: 'center' (default), 'bottom' (feet/base stays on the box's bottom
+   edge — used for things that must sit on the ground/platform), or 'top'. */
+function drawImageAspect(img, x, y, boxW, boxH, align){
+  if (!imgReady(img)) return false;
+  const iw = img.naturalWidth, ih = img.naturalHeight;
+  if (!iw || !ih) return false;
+  const scale = Math.min(boxW/iw, boxH/ih);
+  const dw = iw*scale, dh = ih*scale;
+  const dx = x + (boxW-dw)/2;
+  let dy;
+  if (align === 'bottom') dy = y + (boxH-dh);
+  else if (align === 'top') dy = y;
+  else dy = y + (boxH-dh)/2;
+  ctx.drawImage(img, dx, dy, dw, dh);
+  return true;
+}
 
 /* =========================================================
    CANVAS / GLOBAL SETUP
@@ -758,6 +792,11 @@ function goToDifficultyScreen(){
   gameState = STATE.DIFFICULTY;
   elIntro.classList.add('hidden');
   elCutscene.classList.add('hidden');
+  elTrivia.classList.add('hidden');
+  elGameOver.classList.add('hidden');   // <-- FIX: was never hidden, so it stayed on top
+  elHud.classList.add('hidden');
+  controlsLeft.classList.add('hidden');
+  controlsRight.classList.add('hidden');
   elDifficulty.classList.remove('hidden');
   menuHsValue.textContent = getHighScore();
 }
@@ -819,9 +858,8 @@ function drawIntroScene(dt){
   if (introWalkX > W+80) introWalkX = -80;
   const bob = Math.sin(introWalkX*0.15) * 5;
   const oy = H-60-58 + bob;
-  if (imgReady(gambarObor)){
-    ctx.drawImage(gambarObor, introWalkX, oy, 56, 58);
-  } else {
+  // FIX: aspect-correct draw for the intro walking silhouette too
+  if (!drawImageAspect(gambarObor, introWalkX, oy, 56, 58, 'bottom')){
     ctx.fillStyle = '#ffbe3d';
     ctx.shadowColor = 'rgba(255,150,30,0.9)';
     ctx.shadowBlur = 18;
@@ -881,59 +919,10 @@ function wind(baseY,rMin,rMax,spd){
 }
 function finishLine(x){ return { x:x, y:270, w:18, h:190 }; }
 
+// NEW LEVEL ORDER (per requirements): 1) Cave, 2) Forest, 3) City (final)
 const LEVELS = [
   {
-    name:"Kota Tanjung",
-    bg: bgKota,
-    fallbackColor:['#1b3a5c','#0d1c33'],
-    length:2500,
-    startX:60,
-    platforms:[
-      seg(0,460), seg(560,420), seg(1080,420), seg(1600,900),
-      plat(620,340,120), plat(820,260,110), plat(1150,360,130), plat(1330,280,110),
-      plat(1700,350,150), plat(1950,260,130), plat(2150,360,120)
-    ],
-    fruits:[
-      fruit(100,460), fruit(300,460), fruit(650,340), fruit(850,260), fruit(1180,360),
-      fruit(1360,280), fruit(1730,350), fruit(1980,260), fruit(2180,360), fruit(2300,460)
-    ],
-    waters:[
-      water(600,460), water(900,460), water(1200,460), water(1650,460), water(2050,460)
-    ],
-    hazards:[
-      wind(380,440,580,1.6), wind(200,650,900,1.8), wind(340,960,1100,1.7),
-      wind(220,1150,1380,2.0), wind(380,1480,1620,1.6), wind(200,1700,2000,2.1),
-      wind(340,2100,2350,1.9)
-    ],
-    finish: finishLine(2450)
-  },
-  {
-    name:"Jalur Emas Hitam",
-    bg: bgHutan,
-    fallbackColor:['#1a3320','#0c1a10'],
-    length:2800,
-    startX:60,
-    platforms:[
-      seg(0,420), seg(540,360), seg(1010,370), seg(1500,350), seg(1970,830),
-      plat(470,320,100), plat(650,240,100), plat(950,360,120), plat(1120,270,110),
-      plat(1420,330,110), plat(1600,250,110), plat(1900,340,130), plat(2100,250,110), plat(2350,330,120)
-    ],
-    fruits:[
-      fruit(80,460), fruit(250,460), fruit(500,320), fruit(680,240), fruit(980,360),
-      fruit(1150,270), fruit(1450,330), fruit(1630,250), fruit(1930,340), fruit(2130,250),
-      fruit(2380,330), fruit(2650,460)
-    ],
-    waters:[
-      water(600,460), water(1050,460), water(1550,460), water(2000,460), water(2500,460)
-    ],
-    hazards:[
-      wind(360,400,560,2.0), wind(200,620,900,2.2), wind(320,870,1030,2.1),
-      wind(230,1080,1400,2.3), wind(360,1350,1520,2.0), wind(220,1550,1900,2.4),
-      wind(340,1830,1990,2.1), wind(230,2050,2400,2.5), wind(360,2400,2700,2.2)
-    ],
-    finish: finishLine(2750)
-  },
-  {
+    // Level 1: Cave
     name:"Gua Liang Tapah",
     bg: bgGua,
     fallbackColor:['#241626','#0d0710'],
@@ -960,6 +949,59 @@ const LEVELS = [
       wind(210,2300,2620,2.9), wind(340,2580,2950,2.6)
     ],
     finish: finishLine(3050)
+  },
+  {
+    // Level 2: Forest
+    name:"Jalur Emas Hitam",
+    bg: bgHutan,
+    fallbackColor:['#1a3320','#0c1a10'],
+    length:2800,
+    startX:60,
+    platforms:[
+      seg(0,420), seg(540,360), seg(1010,370), seg(1500,350), seg(1970,830),
+      plat(470,320,100), plat(650,240,100), plat(950,360,120), plat(1120,270,110),
+      plat(1420,330,110), plat(1600,250,110), plat(1900,340,130), plat(2100,250,110), plat(2350,330,120)
+    ],
+    fruits:[
+      fruit(80,460), fruit(250,460), fruit(500,320), fruit(680,240), fruit(980,360),
+      fruit(1150,270), fruit(1450,330), fruit(1630,250), fruit(1930,340), fruit(2130,250),
+      fruit(2380,330), fruit(2650,460)
+    ],
+    waters:[
+      water(600,460), water(1050,460), water(1550,460), water(2000,460), water(2500,460)
+    ],
+    hazards:[
+      wind(360,400,560,2.0), wind(200,620,900,2.2), wind(320,870,1030,2.1),
+      wind(230,1080,1400,2.3), wind(360,1350,1520,2.0), wind(220,1550,1900,2.4),
+      wind(340,1830,1990,2.1), wind(230,2050,2400,2.5), wind(360,2400,2700,2.2)
+    ],
+    finish: finishLine(2750)
+  },
+  {
+    // Level 3 (Final): City / Tugu Obor
+    name:"Kota Tanjung",
+    bg: bgKota,
+    fallbackColor:['#1b3a5c','#0d1c33'],
+    length:2500,
+    startX:60,
+    platforms:[
+      seg(0,460), seg(560,420), seg(1080,420), seg(1600,900),
+      plat(620,340,120), plat(820,260,110), plat(1150,360,130), plat(1330,280,110),
+      plat(1700,350,150), plat(1950,260,130), plat(2150,360,120)
+    ],
+    fruits:[
+      fruit(100,460), fruit(300,460), fruit(650,340), fruit(850,260), fruit(1180,360),
+      fruit(1360,280), fruit(1730,350), fruit(1980,260), fruit(2180,360), fruit(2300,460)
+    ],
+    waters:[
+      water(600,460), water(900,460), water(1200,460), water(1650,460), water(2050,460)
+    ],
+    hazards:[
+      wind(380,440,580,1.6), wind(200,650,900,1.8), wind(340,960,1100,1.7),
+      wind(220,1150,1380,2.0), wind(380,1480,1620,1.6), wind(200,1700,2000,2.1),
+      wind(340,2100,2350,1.9)
+    ],
+    finish: finishLine(2450)
   }
 ];
 
@@ -1092,9 +1134,10 @@ function drawPlayer(){
     ctx.translate(-(drawX + visualW/2), 0);
   }
 
-  if (imgReady(img)){
-    ctx.drawImage(img, drawX, drawY, visualW, visualH);
-  } else {
+  // FIX: draw with original aspect ratio preserved (fit inside the box,
+  // aligned to the bottom so the feet stay planted), instead of stretching
+  // the sprite to exactly visualW x visualH.
+  if (!drawImageAspect(img, drawX, drawY, visualW, visualH, 'bottom')){
     ctx.fillStyle = '#ffbe3d';
     ctx.shadowColor = 'rgba(255,150,30,0.85)';
     ctx.shadowBlur = 14;
@@ -1162,9 +1205,8 @@ function drawCollectibles(lvl){
   lvl.fruits.forEach(f=>{
     if (f.collected) return;
     const by = f.y + Math.sin(bobPhase + f.x*0.01)*4;
-    if (imgReady(gambarLangsat)){
-      ctx.drawImage(gambarLangsat, f.x, by, f.w, f.h);
-    } else {
+    // FIX: aspect-correct draw (contain, centered) instead of forcing f.w x f.h
+    if (!drawImageAspect(gambarLangsat, f.x, by, f.w, f.h, 'center')){
       ctx.save();
       ctx.fillStyle = '#ffd166'; ctx.shadowColor='rgba(255,209,102,0.9)'; ctx.shadowBlur=10;
       ctx.beginPath(); ctx.arc(f.x+f.w/2, by+f.h/2, f.w/2, 0, Math.PI*2); ctx.fill();
@@ -1173,9 +1215,8 @@ function drawCollectibles(lvl){
   });
   lvl.waters.forEach(w=>{
     if (w.collected) return;
-    if (imgReady(gambarRintangan)){
-      ctx.drawImage(gambarRintangan, w.x, w.y, w.w, w.h);
-    } else {
+    // FIX: aspect-correct draw (contain, centered) instead of forcing w.w x w.h
+    if (!drawImageAspect(gambarRintangan, w.x, w.y, w.w, w.h, 'center')){
       ctx.save();
       ctx.fillStyle = '#3fb0ff'; ctx.shadowColor='rgba(63,176,255,0.8)'; ctx.shadowBlur=10;
       roundRect(ctx, w.x, w.y, w.w, w.h, 8); ctx.fill();
@@ -1199,9 +1240,8 @@ function drawHazards(lvl){
   const bobPhase = player.animT * 0.08;
   lvl.hazards.forEach(h=>{
     const dy = Math.sin(bobPhase + h.x*0.02) * 6;
-    if (imgReady(gambarAngin)){
-      ctx.drawImage(gambarAngin, h.x, h.y+dy, h.w, h.h);
-    } else {
+    // FIX: aspect-correct draw (contain, centered) instead of forcing h.w x h.h
+    if (!drawImageAspect(gambarAngin, h.x, h.y+dy, h.w, h.h, 'center')){
       ctx.save();
       ctx.fillStyle = '#c8e8ff'; ctx.shadowColor='rgba(200,232,255,0.7)'; ctx.shadowBlur=10;
       roundRect(ctx, h.x, h.y+dy, h.w, h.h, 10); ctx.fill();
@@ -1215,9 +1255,9 @@ function drawHazards(lvl){
 ========================================================= */
 function drawFinish(lvl){
   const f = lvl.finish;
-  if (imgReady(gambarFinish)){
-    ctx.drawImage(gambarFinish, f.x-20, f.y-10, 60, f.h+30);
-  } else {
+  // FIX: aspect-correct draw (contain, aligned to the ground) instead of
+  // forcing the flag sprite into a 60 x (f.h+30) box.
+  if (!drawImageAspect(gambarFinish, f.x-20, f.y-10, 60, f.h+30, 'bottom')){
     // pole
     ctx.fillStyle = '#e8e8e8';
     ctx.fillRect(f.x, f.y, 6, f.h);
@@ -1421,6 +1461,12 @@ function drawLevelBackground(lvl){
       ctx.fill();
     }
   }
+
+  // FIX: global background darkening layer, drawn over the background
+  // (before platforms/collectibles/hazards/player are drawn) so the
+  // backgrounds never look too bright and the sprites stand out clearly.
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+  ctx.fillRect(0, 0, W, H);
 }
 
 /* =========================================================
