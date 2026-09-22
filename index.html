@@ -1266,16 +1266,28 @@ function drawPlayer(){
 function drawPlatforms(lvl){
   lvl.platforms.forEach(p=>{
     if (imgReady(gambarBlok)){
-      const tw = gambarBlok.width, th = gambarBlok.height;
-      // tile the block sprite across the platform width/height
-      const cols = Math.max(1, Math.ceil(p.w / tw));
-      const rows = Math.max(1, Math.ceil(Math.min(p.h, 60) / th));
+      const tw = gambarBlok.naturalWidth, th = gambarBlok.naturalHeight;
+      // FIX: the old code cropped a tiny dw x dh slice from the TOP-LEFT
+      // corner of blok.png at 1:1 pixel scale — for thin floating platforms
+      // (p.h = 20) that meant only the top 20 source pixels were ever
+      // sampled, so most of the sprite's color/detail was silently cut off
+      // ("warnanya sebagian hilang"). Now we scale the FULL source image
+      // into each repeating tile instead, preserving its aspect ratio, so
+      // the whole design is always visible.
+      const tileH = Math.max(1, Math.min(p.h, 60));
+      const tileW = tileH * (tw / th);
+      const cols = Math.max(1, Math.ceil(p.w / tileW));
+      const rows = Math.max(1, Math.ceil(p.h / tileH));
       for (let r=0;r<rows;r++){
         for (let c=0;c<cols;c++){
-          const dw = Math.min(tw, p.w - c*tw);
-          const dh = Math.min(th, p.h - r*th);
+          const dw = Math.min(tileW, p.w - c*tileW);
+          const dh = Math.min(tileH, p.h - r*tileH);
           if (dw<=0||dh<=0) continue;
-          ctx.drawImage(gambarBlok, 0,0, dw/tw*tw, dh/th*th, p.x+c*tw, p.y+r*th, dw, dh);
+          // proportional source slice (only shrinks for a partial edge
+          // tile — full tiles always use the ENTIRE source image, scaled)
+          const sw = (dw/tileW) * tw;
+          const sh = (dh/tileH) * th;
+          ctx.drawImage(gambarBlok, 0, 0, sw, sh, p.x+c*tileW, p.y+r*tileH, dw, dh);
         }
       }
     } else {
