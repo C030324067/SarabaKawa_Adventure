@@ -3,150 +3,444 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Saraba Kawa Adventure — Special Anniversary Edition</title>
+<title>Saraba Kawa Adventure — Platformer Anniversary Edition</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;700;900&display=swap');
 
   :root{
-    --pixel-bg:#11163b;
-    --pixel-sky:#4fc7f7;
-    --pixel-blue:#2b79d8;
-    --pixel-navy:#0d1635;
-    --pixel-brown:#8b4a2f;
-    --pixel-brown-dark:#4a241c;
-    --pixel-brown-light:#c77b43;
-    --pixel-gold:#ffd34d;
-    --pixel-white:#fff8df;
-    --pixel-red:#e94b35;
-    --pixel-green:#35b85a;
-    --pixel-cyan:#33d6d0;
+    --clr-fire-1:#ff7a18;
+    --clr-fire-2:#ffbe3d;
+    --clr-fire-3:#ff3d3d;
+    --clr-night-1:#0b1030;
+    --clr-night-2:#1a2352;
+    --clr-gold:#ffd166;
+    --clr-teal:#2ee6c8;
+    --clr-water:#3fb0ff;
+    --clr-panel:#151a3c;
+    --clr-panel-light:#212a5c;
+    --clr-text:#fdf6e9;
   }
 
   *{box-sizing:border-box;}
   html,body{
     margin:0;padding:0;height:100%;
-    background:#090d22;
-    font-family:'Press Start 2P', monospace;
-    color:var(--pixel-white);
+    background:radial-gradient(ellipse at top, #1a2352 0%, #0b0e24 60%, #06071a 100%);
+    font-family:'Nunito',sans-serif;
+    color:var(--clr-text);
     overflow:hidden;
     -webkit-tap-highlight-color:transparent;
     user-select:none;
   }
 
-  button,input{font:inherit;}
-  #game-wrap{position:relative;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;}
+  h1,h2,h3,.title-font{font-family:'Baloo 2',cursive;}
+
+  #game-wrap{
+    position:relative;
+    width:100vw;height:100vh;
+    display:flex;align-items:center;justify-content:center;
+  }
 
   #stage{
     position:relative;
-    width:min(96vw,960px);
-    aspect-ratio:960/540;
+    width:min(96vw, 960px);
+    aspect-ratio: 960/540;
     background:#000;
+    border-radius:18px;
     overflow:hidden;
-    border:5px solid #c9913e;
-    box-shadow:0 0 0 3px #2d1b17, 0 14px 0 #070914, 0 24px 50px rgba(0,0,0,.65);
-    image-rendering:pixelated;
+    box-shadow:0 0 0 3px rgba(255,209,102,.35), 0 0 40px rgba(255,122,24,.35), 0 20px 60px rgba(0,0,0,.6);
   }
 
-  canvas{position:absolute;inset:0;width:100%;height:100%;display:block;image-rendering:pixelated;}
-
-  #stage::after{
-    content:'';position:absolute;inset:0;pointer-events:none;z-index:12;
-    background:repeating-linear-gradient(to bottom,rgba(255,255,255,.025) 0,rgba(255,255,255,.025) 1px,transparent 1px,transparent 4px);
-    mix-blend-mode:screen;
+  canvas{
+    position:absolute;top:0;left:0;
+    width:100%;height:100%;
+    display:block;
+    image-rendering:optimizeQuality;
   }
 
   .overlay{
-    position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    text-align:center;padding:24px;background:rgba(5,10,30,.48);z-index:20;
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;
+    padding:min(4vw,24px);
+    background:linear-gradient(180deg, rgba(6,7,26,.55), rgba(6,7,26,.85));
+    backdrop-filter:blur(1.5px);
+    z-index:20;
   }
-  .hidden{display:none!important;}
+  .hidden{display:none !important;}
 
   .glow-title{
-    font-family:'Press Start 2P',monospace;font-size:clamp(15px,3vw,30px);line-height:1.55;
-    color:var(--pixel-gold);text-shadow:4px 4px 0 #7a351f,0 0 0 #000;margin:0 0 14px;
+    font-size:clamp(22px,4.2vw,40px);
+    font-weight:800;
+    letter-spacing:.5px;
+    color:var(--clr-gold);
+    text-shadow:0 0 8px rgba(255,209,102,.8), 0 0 26px rgba(255,122,24,.6);
+    margin:0 0 6px 0;
   }
-  .sub-title{font-size:clamp(8px,1.25vw,12px);line-height:1.8;color:#fff;margin:0 0 14px;max-width:760px;}
+  .sub-title{
+    font-size:clamp(12px,1.6vw,16px);
+    color:#ffe9c2;
+    margin:0 0 18px 0;
+    opacity:.9;
+  }
 
   .btn{
-    font-family:'Press Start 2P',monospace;font-size:clamp(8px,1.25vw,12px);line-height:1.6;
-    color:#fff8d7;background:#e78a28;border:4px solid #fff0b0;border-right-color:#7a351f;border-bottom-color:#7a351f;
-    padding:11px 16px;cursor:pointer;position:relative;z-index:101;box-shadow:4px 4px 0 #32150f;
-    border-radius:0;transition:none;
+    font-family:'Baloo 2',cursive;
+    font-size:clamp(14px,2vw,18px);
+    font-weight:700;
+    color:#1a1330;
+    background:linear-gradient(180deg,var(--clr-gold),var(--clr-fire-1));
+    border:none;
+    padding:12px 26px;
+    border-radius:14px;
+    cursor:pointer;
+    box-shadow:0 0 0 2px rgba(255,255,255,.15) inset, 0 6px 0 #a45312, 0 8px 18px rgba(255,122,24,.45);
+    transition:transform .08s ease, box-shadow .08s ease;
   }
-  .btn:hover{filter:brightness(1.12);}
-  .btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #32150f;}
-  .btn.secondary{background:#2aaeb0;border-color:#b7fff0;border-right-color:#15565e;border-bottom-color:#15565e;box-shadow:4px 4px 0 #0b2b35;}
+  .btn:active{
+    transform:translateY(4px);
+    box-shadow:0 0 0 2px rgba(255,255,255,.15) inset, 0 2px 0 #a45312, 0 4px 10px rgba(255,122,24,.45);
+  }
+  .btn.secondary{
+    background:linear-gradient(180deg,#4bd8c9,#1fa696);
+    box-shadow:0 0 0 2px rgba(255,255,255,.15) inset, 0 6px 0 #0f5f56, 0 8px 18px rgba(46,230,200,.35);
+  }
+  .btn.secondary:active{
+    box-shadow:0 0 0 2px rgba(255,255,255,.15) inset, 0 2px 0 #0f5f56, 0 4px 10px rgba(46,230,200,.35);
+  }
 
-  #story-dialogue{z-index:60;}
-  #story-characters{display:flex;align-items:flex-end;justify-content:center;gap:28px;margin:0 auto 14px;padding:4px 10px 0;min-height:128px;}
-  .story-character{width:112px;height:112px;object-fit:contain;image-rendering:auto;filter:drop-shadow(0 5px 0 rgba(0,0,0,.45)) drop-shadow(0 0 10px rgba(255,190,60,.22));transition:transform .18s ease,filter .18s ease;pointer-events:none;user-select:none;}
-  #story-obor{transform:translateY(3px) scale(1.06);}
-  #story-sesepuh{transform:translateY(4px) scale(1.02);}
-  #story-characters.speaker-obor #story-obor{transform:translateY(0) scale(1.12);filter:drop-shadow(0 5px 0 rgba(0,0,0,.45)) drop-shadow(0 0 14px rgba(255,166,35,.55));}
-  #story-characters.speaker-sesepuh #story-sesepuh{transform:translateY(0) scale(1.1);filter:drop-shadow(0 5px 0 rgba(0,0,0,.45)) drop-shadow(0 0 14px rgba(255,220,120,.5));}
-  #story-text{position:relative;z-index:2;}
-  @media(max-width:620px){#story-characters{gap:12px;min-height:102px;} .story-character{width:88px;height:88px;} #story-characters.speaker-obor #story-obor{transform:scale(1.08);} #story-characters.speaker-sesepuh #story-sesepuh{transform:scale(1.06);}}
+  /* ---- PvZ-style Cutscene Layer ---- */
+  #cutscene-layer{
+    position:absolute;inset:0;
+    z-index:22;
+    cursor:pointer;
+  }
+  #cutscene-dim{
+    position:absolute;inset:0;
+    background:radial-gradient(ellipse at 50% 40%, rgba(6,7,26,0) 0%, rgba(6,7,26,.25) 70%, rgba(6,7,26,.55) 100%);
+    pointer-events:none;
+  }
+
+  /* Character portraits (Crazy-Dave-style talking sprites) */
+  .portrait-wrap{
+    position:absolute;
+    bottom:150px;
+    width:min(34vw,220px);
+    height:min(40vh,260px);
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    transform-origin:bottom center;
+    transition:filter .25s ease, opacity .25s ease;
+    pointer-events:none;
+    filter:brightness(.5) grayscale(.3);
+  }
+  #wrap-sesepuh{ left:1%; }
+  #wrap-obor{ right:1%; }
+  .portrait-img{
+    max-width:100%;max-height:100%;
+    object-fit:contain;
+    filter:drop-shadow(0 12px 16px rgba(0,0,0,.55));
+  }
+  .portrait-wrap.img-missing .portrait-img{ display:none; }
+  .portrait-fallback{
+    display:none;
+    flex-direction:column;align-items:center;justify-content:flex-end;
+    width:100%;height:100%;
+    gap:6px;
+    padding-bottom:6px;
+  }
+  .portrait-wrap.img-missing .portrait-fallback{ display:flex; }
+  .portrait-fallback-emoji{
+    font-size:min(14vw,88px);
+    filter:drop-shadow(0 8px 12px rgba(0,0,0,.6));
+  }
+  .portrait-fallback-label{
+    font-family:'Baloo 2',cursive;
+    font-weight:700;
+    font-size:clamp(10px,1.4vw,13px);
+    color:var(--clr-gold);
+    background:rgba(10,12,35,.6);
+    border:1px solid rgba(255,209,102,.4);
+    border-radius:8px;
+    padding:2px 8px;
+  }
+  .portrait-wrap.speaking{
+    filter:none;
+    animation:pvzTalk .55s ease-in-out infinite;
+  }
+  .portrait-wrap.listening{
+    filter:brightness(.5) grayscale(.35);
+    animation:none;
+  }
+  @keyframes pvzTalk{
+    0%,100%{ transform:translateY(0) scale(1,1) rotate(0deg); }
+    22%{ transform:translateY(-12px) scale(1.04,0.97) rotate(-2deg); }
+    50%{ transform:translateY(0) scale(0.97,1.03) rotate(0deg); }
+    75%{ transform:translateY(-7px) scale(1.02,0.99) rotate(2deg); }
+  }
+
+  /* Skip Intro button, corner */
+  #btn-skip-intro{
+    position:absolute;
+    top:14px;right:14px;
+    z-index:27;
+    font-family:'Baloo 2',cursive;
+    font-weight:700;
+    font-size:clamp(11px,1.5vw,13px);
+    color:#fff8ea;
+    background:rgba(10,12,35,.65);
+    border:1.5px solid rgba(255,209,102,.5);
+    border-radius:10px;
+    padding:7px 14px;
+    cursor:pointer;
+    box-shadow:0 4px 12px rgba(0,0,0,.4);
+  }
+  #btn-skip-intro:active{ transform:translateY(2px); }
+
+  /* PvZ-style dialogue box */
   #story-dialogue{
-    position:absolute;left:18px;right:18px;bottom:14px;background:#111b42;
-    border:4px solid #e4a644;box-shadow:6px 6px 0 #241316;padding:13px 16px;z-index:25;
-    display:flex;flex-direction:column;gap:8px;align-items:stretch;
+    position:absolute;
+    bottom:14px;left:14px;right:14px;
+    background:linear-gradient(180deg, var(--clr-panel-light), var(--clr-panel));
+    border:3px solid rgba(255,209,102,.65);
+    border-radius:20px;
+    padding:16px 20px;
+    box-shadow:0 0 26px rgba(255,122,24,.3), 0 10px 26px rgba(0,0,0,.55), inset 0 0 0 2px rgba(255,255,255,.05);
+    z-index:26;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    align-items:stretch;
+    cursor:pointer;
   }
-  #story-speaker{font-size:clamp(8px,1.3vw,12px);color:#ffd34d;text-shadow:2px 2px 0 #4d291d;}
-  #story-text{font-size:clamp(8px,1.2vw,11px);line-height:1.9;color:#fff;min-height:3.2em;}
-  #story-buttons{display:flex;justify-content:flex-end;gap:10px;}
-  #story-buttons .btn{padding:8px 12px;font-size:clamp(7px,1.05vw,10px);}
+  #story-speaker{
+    font-family:'Baloo 2',cursive;
+    font-weight:800;
+    color:var(--clr-gold);
+    font-size:clamp(14px,2vw,18px);
+    text-shadow:0 0 6px rgba(255,209,102,.6);
+    display:flex;align-items:center;gap:8px;
+  }
+  #story-speaker .speaker-dot{
+    width:9px;height:9px;border-radius:50%;
+    background:var(--clr-fire-1);
+    box-shadow:0 0 8px rgba(255,122,24,.9);
+    animation:dotPulse 1s ease-in-out infinite;
+  }
+  @keyframes dotPulse{0%,100%{opacity:.4;transform:scale(.8);}50%{opacity:1;transform:scale(1.15);}}
+  #story-text{
+    font-size:clamp(12px,1.8vw,16px);
+    line-height:1.5;
+    color:#fff8ea;
+    min-height:3.2em;
+  }
+  #typewriter-cursor{
+    display:inline-block;
+    margin-left:1px;
+    color:var(--clr-teal);
+    animation:blink .8s steps(1) infinite;
+  }
+  #story-hint{
+    align-self:flex-end;
+    font-family:'Baloo 2',cursive;
+    font-size:clamp(10px,1.4vw,12px);
+    color:rgba(255,233,194,.75);
+    display:flex;align-items:center;gap:6px;
+  }
+  #story-hint .hint-arrow{
+    display:inline-block;
+    animation:hintBounce 1s ease-in-out infinite;
+  }
+  @keyframes hintBounce{0%,100%{transform:translateX(0);}50%{transform:translateX(5px);}}
 
-  #difficulty-grid{display:grid;grid-template-columns:repeat(2,minmax(160px,1fr));gap:12px;margin-top:8px;width:min(90%,500px);}
+  /* ---- Difficulty screen ---- */
+  #difficulty-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(120px,1fr));
+    gap:14px;
+    margin-top:6px;
+    width:min(90%,460px);
+  }
   .diff-btn{
-    font-family:'Press Start 2P',monospace;font-weight:400;font-size:clamp(8px,1.2vw,11px);line-height:1.7;padding:14px 10px;
-    border:4px solid #fff0b0;border-right-color:#3b1c18;border-bottom-color:#3b1c18;cursor:pointer;color:#fff;
-    box-shadow:4px 4px 0 #140d14;border-radius:0;text-shadow:2px 2px 0 rgba(0,0,0,.55);
+    font-family:'Baloo 2',cursive;
+    font-weight:700;
+    font-size:clamp(13px,1.9vw,17px);
+    padding:16px 10px;
+    border-radius:14px;
+    border:2px solid rgba(255,255,255,.15);
+    cursor:pointer;
+    color:#fff;
+    text-shadow:0 1px 3px rgba(0,0,0,.5);
+    box-shadow:0 6px 16px rgba(0,0,0,.4);
+    transition:transform .08s ease;
   }
-  .diff-btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #140d14;}
-  .diff-veryeasy{background:#2caa58}.diff-easy{background:#2879c7}.diff-hard{background:#cf6427}.diff-veryhard{background:#b52f45}
-  .diff-desc{font-size:7px;line-height:1.8;display:block;font-family:'Press Start 2P',monospace;font-weight:400;opacity:.95;margin-top:7px;}
-  #menu-highscore{margin-top:14px;font-size:8px;color:#ffe27b;line-height:1.8;}
+  .diff-btn:active{transform:translateY(3px);}
+  .diff-veryeasy{background:linear-gradient(160deg,#5be08a,#1f9a58);}
+  .diff-easy{background:linear-gradient(160deg,#4bc4ff,#1f7fbf);}
+  .diff-hard{background:linear-gradient(160deg,#ff9a4b,#d9601f);}
+  .diff-veryhard{background:linear-gradient(160deg,#ff5c6c,#b8202f);}
+  .diff-desc{
+    font-size:clamp(10px,1.3vw,12px);
+    display:block;
+    font-weight:400;
+    font-family:'Nunito',sans-serif;
+    opacity:.9;
+    margin-top:4px;
+  }
 
-  /* Classic arcade HUD */
-  #hud{position:absolute;top:0;left:0;right:0;padding:8px 10px 7px;z-index:15;pointer-events:none;}
-  #hud-top-row{display:grid;grid-template-columns:1fr 1.25fr 1.2fr 1.2fr;gap:8px;align-items:stretch;}
-  .hud-block{background:#151426;border:3px solid #f6e2a2;box-shadow:3px 3px 0 #291718;padding:6px 8px;min-width:0;}
-  .hud-label{font-size:7px;color:#fff;line-height:1.7;display:block;}
-  .hud-value{font-size:10px;color:#fff;line-height:1.7;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  #hud-score{color:#ffd34d;}
-  #hud-fruit-count{color:#ffd34d;}
-  #hud-fruit-icon{width:22px;height:22px;vertical-align:middle;image-rendering:pixelated;object-fit:contain;margin-right:3px;}
-  #level-label{font-family:'Press Start 2P',monospace;font-size:8px;color:#fff;line-height:1.8;}
-  .flame-track{height:12px;background:#3a1b1c;border:2px solid #fff2c1;margin-top:3px;overflow:hidden;box-shadow:inset 2px 2px 0 #17101a;}
-  #health-bar-fill{height:100%;width:100%;background:#f6bd2d;box-shadow:inset 0 2px 0 #fff06b;transition:width .12s linear;}
-  #distance-bar-track{position:relative;height:9px;margin-top:7px;background:#321d22;border:2px solid #f6e2a2;overflow:hidden;}
-  #distance-bar-fill{height:100%;width:0;background:#e83e31;box-shadow:inset 0 2px 0 #ffb13b;transition:width .15s linear;}
-  #distance-flag{position:absolute;right:3px;top:-6px;font-size:8px;}
+  /* ---- HUD ---- */
+  #hud{
+    position:absolute;top:0;left:0;right:0;
+    display:flex;flex-direction:column;gap:6px;
+    padding:10px 14px;
+    z-index:15;
+    pointer-events:none;
+  }
+  #hud-top-row{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+  .hud-chip{
+    background:rgba(10,12,35,.6);
+    border:1px solid rgba(255,209,102,.4);
+    border-radius:10px;
+    padding:5px 10px;
+    font-family:'Baloo 2',cursive;
+    font-size:clamp(11px,1.5vw,14px);
+    color:var(--clr-gold);
+    text-shadow:0 0 6px rgba(255,209,102,.5);
+    white-space:nowrap;
+  }
+  #distance-bar-track{
+    position:relative;
+    height:14px;
+    border-radius:8px;
+    background:rgba(10,12,35,.65);
+    border:1px solid rgba(255,209,102,.4);
+    overflow:hidden;
+    box-shadow:inset 0 0 6px rgba(0,0,0,.5);
+  }
+  #distance-bar-fill{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg,var(--clr-fire-2),var(--clr-fire-1),var(--clr-fire-3));
+    box-shadow:0 0 10px rgba(255,122,24,.8);
+    transition:width .15s linear;
+  }
+  #distance-flag{
+    position:absolute;right:2px;top:50%;transform:translateY(-50%);
+    font-size:12px;
+  }
+  #health-bar-track{
+    position:relative;
+    height:14px;
+    border-radius:8px;
+    background:rgba(10,12,35,.65);
+    border:1px solid rgba(63,176,255,.5);
+    overflow:hidden;
+    box-shadow:inset 0 0 6px rgba(0,0,0,.5);
+  }
+  #health-bar-fill{
+    height:100%;
+    width:100%;
+    background:linear-gradient(90deg,#ff3d3d,#ffbe3d,#5be08a);
+    box-shadow:0 0 10px rgba(46,230,200,.6);
+    transition:width .12s linear;
+  }
+  #level-label{
+    font-family:'Baloo 2',cursive;
+    font-size:clamp(11px,1.6vw,14px);
+    color:#fff;
+    text-shadow:0 0 6px rgba(0,0,0,.6);
+  }
 
-  #slide-btn{position:absolute;bottom:14px;right:14px;width:74px;height:62px;background:#2aaeb0;border:4px solid #d6fff2;border-right-color:#15565e;border-bottom-color:#15565e;box-shadow:4px 4px 0 #10242a;display:flex;align-items:center;justify-content:center;font-family:'Press Start 2P',monospace;font-size:8px;color:#071a20;z-index:18;touch-action:none;border-radius:0;}
-  #slide-btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #10242a;}
+  /* ---- Touch controls (Mario-style d-pad + jump) ---- */
+  #controls-left{
+    position:absolute;
+    bottom:16px;left:16px;
+    display:flex;gap:10px;
+    z-index:18;
+    touch-action:none;
+  }
+  #controls-right{
+    position:absolute;
+    bottom:16px;right:16px;
+    z-index:18;
+    touch-action:none;
+  }
+  .ctrl-btn{
+    width:62px;height:62px;
+    border-radius:16px;
+    background:radial-gradient(circle at 35% 30%, #4bd8c9, #0f8c7d);
+    border:3px solid rgba(255,255,255,.5);
+    box-shadow:0 6px 18px rgba(0,0,0,.5), 0 0 18px rgba(46,230,200,.5);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Baloo 2',cursive;
+    font-size:22px;font-weight:700;color:#04231f;
+    user-select:none;
+  }
+  .ctrl-btn:active{filter:brightness(1.25);}
+  #btn-jump{
+    width:78px;height:78px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--clr-gold), var(--clr-fire-1));
+    box-shadow:0 6px 18px rgba(0,0,0,.5), 0 0 18px rgba(255,122,24,.6);
+    font-size:13px;
+  }
 
-  #tap-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Press Start 2P',monospace;font-size:10px;color:#fff;pointer-events:none;text-shadow:3px 3px 0 #000;z-index:14;animation:blink 1.2s steps(1) infinite;}
-  @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+  #tap-hint{
+    position:absolute;
+    top:50%;left:50%;transform:translate(-50%,-50%);
+    font-family:'Baloo 2',cursive;
+    font-size:clamp(14px,2.4vw,20px);
+    color:rgba(255,255,255,.55);
+    pointer-events:none;
+    text-shadow:0 0 10px rgba(0,0,0,.6);
+    z-index:14;
+    animation:hintPulse 1.6s ease-in-out infinite;
+  }
+  @keyframes hintPulse{0%,100%{opacity:.25;}50%{opacity:.7;}}
 
-  #trivia-box{max-width:min(90%,560px);background:#151426;border:4px solid #e4a644;box-shadow:6px 6px 0 #281618;padding:20px;}
-  #trivia-box h3{font-family:'Press Start 2P',monospace;font-size:12px;line-height:1.7;margin:0 0 12px;color:#ffd34d;}
-  #trivia-box p{font-family:'Press Start 2P',monospace;font-size:8px;line-height:2;margin:0 0 16px;}
+  /* ---- Trivia ---- */
+  #trivia-box{
+    max-width:min(90%,520px);
+    background:linear-gradient(180deg,var(--clr-panel-light),var(--clr-panel));
+    border:2px solid rgba(46,230,200,.55);
+    border-radius:18px;
+    padding:22px 24px;
+    box-shadow:0 0 30px rgba(46,230,200,.3);
+  }
+  #trivia-box h3{margin:0 0 10px 0;color:var(--clr-teal);text-shadow:0 0 8px rgba(46,230,200,.6);}
+  #trivia-box p{font-size:clamp(12px,1.7vw,15px);line-height:1.5;margin:0 0 16px 0;}
 
-  #gameOverScreen{z-index:100;pointer-events:auto;background:rgba(5,8,20,.56);backdrop-filter:none;}
-  #gameOverScreen .btn,#gameOverScreen button{pointer-events:auto;position:relative;z-index:101;}
-  #gameover-panel{max-width:min(92%,560px);width:min(92%,560px);position:relative;z-index:101;background:#151426;border:4px solid #e4a644;box-shadow:8px 8px 0 #281618;padding:20px 22px;margin-top:6px;}
-  #gameover-panel.win{border-color:#ffe06a;}
-  #go-title{margin:0 0 12px;font-size:clamp(13px,2.4vw,24px);}
-  #go-stats{margin:10px 0;font-size:8px;line-height:2;color:#fff;}
-  #new-record{font-family:'Press Start 2P',monospace;font-size:8px;color:#ffd34d;line-height:1.8;margin:8px 0 12px;padding:5px 7px;animation:blink .9s steps(1) infinite;}
-  .go-btn-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;position:relative;z-index:101;margin-top:12px;}
+  /* ---- Game over ---- */
+  #gameover-panel{
+    max-width:min(90%,480px);
+    background:linear-gradient(180deg,var(--clr-panel-light),var(--clr-panel));
+    border:2px solid rgba(255,61,61,.55);
+    border-radius:18px;
+    padding:24px;
+    box-shadow:0 0 30px rgba(255,61,61,.35);
+  }
+  #gameover-panel.win{border-color:rgba(255,209,102,.7);box-shadow:0 0 30px rgba(255,209,102,.4);}
+  #go-title{margin:0 0 6px 0;}
+  #go-stats{margin:12px 0 18px 0;font-size:clamp(12px,1.7vw,15px);line-height:1.7;}
+  #new-record{
+    font-family:'Baloo 2',cursive;
+    color:var(--clr-gold);
+    font-weight:800;
+    margin:0 0 14px 0;
+    animation:blink 0.9s steps(1) infinite;
+  }
+  @keyframes blink{0%,49%{opacity:1;}50%,100%{opacity:0;}}
+  .go-btn-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
 
-  @media(max-width:620px){
-    #hud-top-row{grid-template-columns:1fr 1fr;}
-    .hud-block:nth-child(3),.hud-block:nth-child(4){grid-row:2;}
-    #difficulty-grid{grid-template-columns:1fr;max-width:300px;max-height:60vh;overflow:auto;}
-    .sub-title{max-width:90%;}
+  #menu-highscore{
+    margin-top:4px;
+    font-size:clamp(11px,1.5vw,13px);
+    color:var(--clr-teal);
+  }
+
+  @media (max-width:520px){
+    .ctrl-btn{width:54px;height:54px;font-size:18px;}
+    #btn-jump{width:68px;height:68px;font-size:11px;}
   }
 </style>
 </head>
@@ -155,31 +449,50 @@
   <div id="stage">
     <canvas id="gameCanvas" width="960" height="540"></canvas>
 
-    <!-- STORY INTRO -->
+    <!-- STORY INTRO (background scene, drawn on canvas) -->
     <div id="screen-intro" class="overlay">
       <div id="tap-hint" class="hidden"></div>
     </div>
-    <div id="story-dialogue" class="hidden">
-      <div id="story-characters" class="speaker-sesepuh" aria-hidden="true">
-        <img id="story-obor" class="story-character" src="obor_wave.png" alt="Si Obor melambaikan tangan">
-        <img id="story-sesepuh" class="story-character" src="sesepuh.png" alt="Sesepuh Kota Tanjung">
+
+    <!-- PvZ-STYLE DIALOGUE CUTSCENE -->
+    <div id="cutscene-layer" class="hidden">
+      <div id="cutscene-dim"></div>
+
+      <div class="portrait-wrap" id="wrap-sesepuh">
+        <img class="portrait-img" id="img-sesepuh" src="sesepuh.png" alt="Sesepuh Kota Tanjung"
+             onerror="this.parentElement.classList.add('img-missing')">
+        <div class="portrait-fallback">
+          <div class="portrait-fallback-emoji">🧓🏽</div>
+          <div class="portrait-fallback-label">Sesepuh</div>
+        </div>
       </div>
-      <div id="story-speaker">Sesepuh Kota Tanjung</div>
-      <div id="story-text"></div>
-      <div id="story-buttons">
-        <button class="btn secondary" id="btn-skip">Skip</button>
-        <button class="btn" id="btn-continue">Continue</button>
+
+      <div class="portrait-wrap" id="wrap-obor">
+        <img class="portrait-img" id="img-obor" src="obor_wave.png" alt="Si Obor"
+             onerror="this.parentElement.classList.add('img-missing')">
+        <div class="portrait-fallback">
+          <div class="portrait-fallback-emoji">🔥</div>
+          <div class="portrait-fallback-label">Si Obor</div>
+        </div>
+      </div>
+
+      <button id="btn-skip-intro">Skip Intro ⏭</button>
+
+      <div id="story-dialogue">
+        <div id="story-speaker"><span class="speaker-dot"></span><span id="story-speaker-name">Sesepuh Kota Tanjung</span></div>
+        <div id="story-text"><span id="story-text-content"></span><span id="typewriter-cursor">▌</span></div>
+        <div id="story-hint">Klik untuk lanjut <span class="hint-arrow">▶</span></div>
       </div>
     </div>
 
     <!-- DIFFICULTY SELECTION -->
     <div id="screen-difficulty" class="overlay hidden">
       <h1 class="glow-title">Pilih Tingkat Kesulitan</h1>
-      <p class="sub-title">Semakin tinggi kesulitan, semakin cepat arus Sungai Tabalong menghanyutkanmu!</p>
+      <p class="sub-title">Semakin tinggi kesulitan, semakin ganas angin &amp; semakin sedikit pemulihan yang kau dapat!</p>
       <div id="difficulty-grid">
         <button class="diff-btn diff-veryeasy" data-diff="veryeasy">Very Easy<span class="diff-desc">Santai &amp; ramah pemula</span></button>
-        <button class="diff-btn diff-easy" data-diff="easy">Easy<span class="diff-desc">Kecepatan sedang</span></button>
-        <button class="diff-btn diff-hard" data-diff="hard">Hard<span class="diff-desc">Cepat &amp; padat rintangan</span></button>
+        <button class="diff-btn diff-easy" data-diff="easy">Easy<span class="diff-desc">Tantangan sedang</span></button>
+        <button class="diff-btn diff-hard" data-diff="hard">Hard<span class="diff-desc">Angin cepat &amp; padat</span></button>
         <button class="diff-btn diff-veryhard" data-diff="veryhard">Very Hard<span class="diff-desc">Untuk para juara sejati</span></button>
       </div>
       <div id="menu-highscore">🏆 Rekor Tertinggi: <span id="menu-hs-value">0</span></div>
@@ -188,14 +501,22 @@
     <!-- HUD -->
     <div id="hud" class="hidden">
       <div id="hud-top-row">
-        <div class="hud-block"><span class="hud-label">OBOR</span><span class="hud-value" id="hud-score">000000</span></div>
-        <div class="hud-block"><span class="hud-label">LANGSAT</span><span class="hud-value"><img id="hud-fruit-icon" src="langsat.png" alt=""> × <span id="hud-fruit-count">0</span></span></div>
-        <div class="hud-block"><span class="hud-label">WORLD</span><span id="level-label">1-1: TANJUNG</span></div>
-        <div class="hud-block"><span class="hud-label">FLAME</span><div class="flame-track"><div id="health-bar-fill"></div></div></div>
+        <div class="hud-chip">🔥 Skor: <span id="hud-score">0</span></div>
+        <div id="level-label">Kota Tanjung</div>
+        <div class="hud-chip">🏆 <span id="hud-highscore">0</span></div>
       </div>
-      <div id="distance-bar-track"><div id="distance-bar-fill"></div><div id="distance-flag">◆</div></div>
+      <div id="distance-bar-track"><div id="distance-bar-fill"></div><div id="distance-flag">🏁</div></div>
+      <div id="health-bar-track"><div id="health-bar-fill"></div></div>
     </div>
-    <button id="slide-btn" class="hidden">SLIDE<br>▼</button>
+
+    <!-- TOUCH CONTROLS -->
+    <div id="controls-left" class="hidden">
+      <div class="ctrl-btn" id="btn-left">◀</div>
+      <div class="ctrl-btn" id="btn-right">▶</div>
+    </div>
+    <div id="controls-right" class="hidden">
+      <div class="ctrl-btn" id="btn-jump">JUMP<br>▲</div>
+    </div>
 
     <!-- TRIVIA -->
     <div id="screen-trivia" class="overlay hidden">
@@ -207,7 +528,7 @@
     </div>
 
     <!-- GAME OVER / WIN -->
-    <div id="gameOverScreen" class="overlay hidden">
+    <div id="screen-gameover" class="overlay hidden">
       <div id="gameover-panel">
         <h2 id="go-title" class="glow-title">Api Padam...</h2>
         <div id="new-record" class="hidden">🎉 REKOR BARU TERCIPTA! 🎉</div>
@@ -229,27 +550,18 @@
 "use strict";
 
 /* =========================================================
-   ASSET LOADING
+   EXTERNAL .PNG ASSET VARIABLES (top of script, as required)
 ========================================================= */
-// Retro pixel-art sprite hook: cute fiery Si Obor. Replace with an 8-bit/16-bit sprite asset.
-const imgObor = new Image(); imgObor.src = 'obor.png';
-// Retro pixel-art intro waving sprite.
-const imgOborWave = new Image(); imgOborWave.src = 'obor_wave.png';
-// Story character asset: Sesepuh Kota Tanjung.
-const imgSesepuh = new Image(); imgSesepuh.src = 'sesepuh.png';
-// Retro pixel-art crouching/sliding Si Obor sprite.
-const imgOborSlide = new Image(); imgOborSlide.src = 'obor_slide.png';
-// Retro pixel-art sharp blue water geyser hazard.
-const imgRintangan = new Image(); imgRintangan.src = 'rintangan.png';
-// Retro pixel-art spinning vortex/tornado hazard.
-const imgAngin = new Image(); imgAngin.src = 'angin.png';
-const imgLangsat = new Image(); imgLangsat.src = 'langsat.png';
-// Stylized 16-bit Tabalong city/parallax background.
-const imgBgKota = new Image(); imgBgKota.src = 'bg_kota.png';
-// Stylized 16-bit Tabalong forest/mining-route background.
-const imgBgHutan = new Image(); imgBgHutan.src = 'bg_hutan.png';
-// Stylized 16-bit Liang Tapah cave background.
-const imgBgGua = new Image(); imgBgGua.src = 'bg_gua.png';
+const gambarObor      = new Image(); gambarObor.src      = 'obor.png';        // Si Obor (player)
+const gambarLangsat   = new Image(); gambarLangsat.src   = 'langsat.png';     // Langsat Tanjung collectible (+10 score)
+const gambarRintangan = new Image(); gambarRintangan.src = 'rintangan.png';   // Water item (+15% health)
+const gambarAngin     = new Image(); gambarAngin.src     = 'angin.png';       // Wind / tornado hazard (-20% health)
+const gambarBlok      = new Image(); gambarBlok.src      = 'blok.png';        // Platform / block sprite (tiled)
+const gambarFinish    = new Image(); gambarFinish.src    = 'finish.png';      // Optional finish-line flag sprite
+
+const bgKota  = new Image(); bgKota.src  = 'bg_kota.png';
+const bgHutan = new Image(); bgHutan.src = 'bg_hutan.png';
+const bgGua   = new Image(); bgGua.src   = 'bg_gua.png';
 
 const bgmGame = new Audio('bgm.mp3');
 const sfxLangsat = new Audio('sfx_langsat.mp3');
@@ -263,7 +575,7 @@ function unlockAudio(){
   audioUnlocked = true;
   bgmGame.currentTime = 0;
   const p = bgmGame.play();
-  if (p && typeof p.catch === 'function'){ p.catch(()=>{ /* ignore autoplay rejection, will retry on next gesture */ audioUnlocked = false; }); }
+  if (p && typeof p.catch === 'function'){ p.catch(()=>{ audioUnlocked = false; }); }
 }
 function playSfx(sfx){
   try{
@@ -272,7 +584,6 @@ function playSfx(sfx){
     if (p && typeof p.catch === 'function'){ p.catch(()=>{}); }
   } catch(e){ /* ignore */ }
 }
-
 function imgReady(im){ return im.complete && im.naturalWidth > 0; }
 
 /* =========================================================
@@ -281,8 +592,6 @@ function imgReady(im){ return im.complete && im.naturalWidth > 0; }
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const W = canvas.width, H = canvas.height;
-const GROUND_Y = H - 70;
-const CEIL_Y = 70;
 
 /* =========================================================
    STATE MACHINE
@@ -294,12 +603,12 @@ let gameState = STATE.INTRO;
    DOM REFS
 ========================================================= */
 const elIntro = document.getElementById('screen-intro');
-const elStoryDialogue = document.getElementById('story-dialogue');
-const elStorySpeaker = document.getElementById('story-speaker');
-const elStoryText = document.getElementById('story-text');
-const storyCharacters = document.getElementById('story-characters');
-const btnContinue = document.getElementById('btn-continue');
-const btnSkip = document.getElementById('btn-skip');
+const elCutscene = document.getElementById('cutscene-layer');
+const elStorySpeakerName = document.getElementById('story-speaker-name');
+const elStoryTextContent = document.getElementById('story-text-content');
+const btnSkipIntro = document.getElementById('btn-skip-intro');
+const wrapSesepuh = document.getElementById('wrap-sesepuh');
+const wrapObor = document.getElementById('wrap-obor');
 
 const elDifficulty = document.getElementById('screen-difficulty');
 const menuHsValue = document.getElementById('menu-hs-value');
@@ -307,17 +616,20 @@ const menuHsValue = document.getElementById('menu-hs-value');
 const elHud = document.getElementById('hud');
 const hudScore = document.getElementById('hud-score');
 const hudHighscore = document.getElementById('hud-highscore');
-const hudFruitCount = document.getElementById('hud-fruit-count');
 const levelLabel = document.getElementById('level-label');
 const distanceFill = document.getElementById('distance-bar-fill');
 const healthFill = document.getElementById('health-bar-fill');
-const slideBtn = document.getElementById('slide-btn');
+const controlsLeft = document.getElementById('controls-left');
+const controlsRight = document.getElementById('controls-right');
+const btnLeft = document.getElementById('btn-left');
+const btnRight = document.getElementById('btn-right');
+const btnJump = document.getElementById('btn-jump');
 
 const elTrivia = document.getElementById('screen-trivia');
 const triviaText = document.getElementById('trivia-text');
 const btnTriviaContinue = document.getElementById('btn-trivia-continue');
 
-const elGameOver = document.getElementById('gameOverScreen');
+const elGameOver = document.getElementById('screen-gameover');
 const goPanel = document.getElementById('gameover-panel');
 const goTitle = document.getElementById('go-title');
 const goScore = document.getElementById('go-score');
@@ -339,68 +651,114 @@ function setHighScore(v){
 }
 let highScore = getHighScore();
 menuHsValue.textContent = highScore;
-if (hudHighscore) hudHighscore.textContent = highScore;
+hudHighscore.textContent = highScore;
 
 /* =========================================================
-   STORY INTRO DATA
+   STORY INTRO DATA — PvZ-style dialogue cutscene
+   speaker: 'sesepuh' (left, sesepuh.png) | 'obor' (right, obor_wave.png)
 ========================================================= */
 const storyLines = [
-  { speaker:"Sesepuh Kota Tanjung", text:"Sebentar lagi Hari Jadi Tabalong tiba... namun Obor Pancasila di tugu kota mulai meredup." },
-  { speaker:"Sesepuh Kota Tanjung", text:"Angin dari lembah dan air yang deras telah mengguncang nyala api suci itu selama berhari-hari." },
-  { speaker:"Si Obor", text:"Aku, Si Obor, akan menempuh perjalanan dari Kota Tanjung, menembus Jalur Emas Hitam, hingga ke Gua Liang Tapah." },
-  { speaker:"Si Obor", text:"Di sana, aku akan menemukan sumber nyala yang akan menghidupkan kembali semangat Tabalong!" },
-  { speaker:"Sesepuh Kota Tanjung", text:"Berhati-hatilah, Obor. Air akan menguatkanmu, langsat akan menambah semangatmu, namun angin kencang akan memadamkanmu." },
-  { speaker:"Si Obor", text:"Aku siap. Demi Tabalong, nyala ini tidak boleh padam!" }
+  { speaker:"sesepuh", name:"Sesepuh Kota Tanjung", text:"Si Obor... lihatlah. Nyala abadi di Tugu Obor Pancasila mulai meredup jelang Hari Jadi Tabalong." },
+  { speaker:"sesepuh", name:"Sesepuh Kota Tanjung", text:"Angin puting beliung dari lembah terus menerjang, hampir memadamkan api suci itu setiap malam." },
+  { speaker:"obor", name:"Si Obor", text:"Tenang, Sesepuh! Aku akan berlari dan melompat menyusuri seluruh Tabalong untuk mencari cara menyalakannya kembali!" },
+  { speaker:"sesepuh", name:"Sesepuh Kota Tanjung", text:"Di sepanjang jalan, kau akan menemukan mata air penyegar dan buah Langsat Tanjung di atas batu serta platform tinggi." },
+  { speaker:"obor", name:"Si Obor", text:"Air itu akan memulihkan semangat apiku, dan Langsat akan menambah poin perjalananku, kan?" },
+  { speaker:"sesepuh", name:"Sesepuh Kota Tanjung", text:"Benar sekali! Tapi awas — angin puyuh akan berkeliaran di udara. Sentuhannya bisa meredupkan nyalamu hingga 20 persen!" },
+  { speaker:"obor", name:"Si Obor", text:"Baik! Aku harus melompat dari platform ke platform, kumpulkan air dan langsat, dan hindari angin, sampai garis akhir tiap wilayah!" },
+  { speaker:"sesepuh", name:"Sesepuh Kota Tanjung", text:"Berangkatlah, Si Obor. Seluruh Tabalong menanti nyala harapan itu menyala kembali!" },
+  { speaker:"obor", name:"Si Obor", text:"Untuk Tabalong... aku siap berpetualang! 🔥" }
 ];
 let storyIndex = 0;
 
+/* --- typewriter reveal state --- */
+const TYPEWRITER_SPEED_MS = 26; // ms per character
+let typewriterAccum = 0;
+let typewriterCharIndex = 0;
+let typewriterDone = true;
+let currentLineText = '';
+
+function setPortraitStates(speaker){
+  wrapSesepuh.classList.toggle('speaking', speaker === 'sesepuh');
+  wrapSesepuh.classList.toggle('listening', speaker !== 'sesepuh');
+  wrapObor.classList.toggle('speaking', speaker === 'obor');
+  wrapObor.classList.toggle('listening', speaker !== 'obor');
+}
+
 function showStoryLine(){
   const line = storyLines[storyIndex];
-  elStorySpeaker.textContent = line.speaker;
-  elStoryText.textContent = line.text;
-  // Both Si Obor and Sesepuh stay above every dialogue line; the active speaker is highlighted.
-  storyCharacters.classList.toggle('speaker-obor', line.speaker === 'Si Obor');
-  storyCharacters.classList.toggle('speaker-sesepuh', line.speaker === 'Sesepuh Kota Tanjung');
-  btnContinue.textContent = (storyIndex === storyLines.length - 1) ? "Mulai!" : "Continue";
+  elStorySpeakerName.textContent = line.name;
+  currentLineText = line.text;
+  typewriterCharIndex = 0;
+  typewriterAccum = 0;
+  typewriterDone = false;
+  elStoryTextContent.textContent = '';
+  setPortraitStates(line.speaker);
 }
 
-function startIntro(){
-  gameState = STATE.INTRO;
-  storyIndex = 0;
-  elIntro.classList.remove('hidden');
-  elStoryDialogue.classList.remove('hidden');
-  elDifficulty.classList.add('hidden');
-  elHud.classList.add('hidden');
-  slideBtn.classList.add('hidden');
-  elTrivia.classList.add('hidden');
-  elGameOver.classList.add('hidden');
-  showStoryLine();
-  introParticles = spawnParticles(46);
-  introWaveTimer = 0;
-  introWaveT = 0;
-  introWaveActive = false;
+function updateTypewriter(dt){
+  if (typewriterDone || gameState !== STATE.INTRO) return;
+  typewriterAccum += dt;
+  let advanced = false;
+  while (typewriterAccum >= TYPEWRITER_SPEED_MS && !typewriterDone){
+    typewriterAccum -= TYPEWRITER_SPEED_MS;
+    typewriterCharIndex++;
+    advanced = true;
+    if (typewriterCharIndex >= currentLineText.length){
+      typewriterCharIndex = currentLineText.length;
+      typewriterDone = true;
+    }
+  }
+  if (advanced){
+    elStoryTextContent.textContent = currentLineText.slice(0, typewriterCharIndex);
+  }
 }
 
-btnContinue.addEventListener('click', ()=>{
+/* Click anywhere on the cutscene (or the dialogue box) to speed up
+   the typewriter, or advance to the next line once fully revealed. */
+function handleCutsceneAdvance(){
+  if (gameState !== STATE.INTRO) return;
   unlockAudio();
+  if (!typewriterDone){
+    typewriterCharIndex = currentLineText.length;
+    typewriterDone = true;
+    elStoryTextContent.textContent = currentLineText;
+    return;
+  }
   if (storyIndex < storyLines.length - 1){
     storyIndex++;
     showStoryLine();
   } else {
     goToDifficultyScreen();
   }
+}
+elCutscene.addEventListener('click', handleCutsceneAdvance);
+
+btnSkipIntro.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  unlockAudio();
+  goToDifficultyScreen();
 });
-btnSkip.addEventListener('click', ()=>{ unlockAudio(); goToDifficultyScreen(); });
+
+function startIntro(){
+  gameState = STATE.INTRO;
+  storyIndex = 0;
+  elIntro.classList.remove('hidden');
+  elCutscene.classList.remove('hidden');
+  elDifficulty.classList.add('hidden');
+  elHud.classList.add('hidden');
+  controlsLeft.classList.add('hidden');
+  controlsRight.classList.add('hidden');
+  elTrivia.classList.add('hidden');
+  elGameOver.classList.add('hidden');
+  showStoryLine();
+  introParticles = spawnParticles(46);
+}
 
 function goToDifficultyScreen(){
   gameState = STATE.DIFFICULTY;
   elIntro.classList.add('hidden');
-  elStoryDialogue.classList.add('hidden');
+  elCutscene.classList.add('hidden');
   elDifficulty.classList.remove('hidden');
-  elHud.classList.add('hidden');
-  elTrivia.classList.add('hidden');
-  slideBtn.classList.add('hidden');
-  elGameOver.classList.add('hidden');
   menuHsValue.textContent = getHighScore();
 }
 
@@ -424,37 +782,12 @@ function spawnParticles(n){
   return arr;
 }
 let introWalkX = -60;
-let introWaveT = 0;
-let introWaveTimer = 0;
-let introWaveActive = false;
-const INTRO_WAVE_INTERVAL = 2600;
-const INTRO_WAVE_DURATION = 900;
-
-function updateIntroWave(dt){
-  const delta = Math.max(0, Math.min(dt || 16, 100));
-  introWaveTimer += delta;
-  if (!introWaveActive && introWaveTimer >= INTRO_WAVE_INTERVAL){
-    introWaveActive = true;
-    introWaveTimer = 0;
-  }
-  if (introWaveActive){
-    introWaveT += delta;
-    if (introWaveT >= INTRO_WAVE_DURATION){
-      introWaveActive = false;
-      introWaveT = 0;
-    }
-  }
-}
-
 function drawIntroScene(dt){
-  updateIntroWave(dt);
-  // night gradient sky
   const g = ctx.createLinearGradient(0,0,0,H);
   g.addColorStop(0,'#0b1030'); g.addColorStop(0.6,'#141b45'); g.addColorStop(1,'#241a3a');
   ctx.fillStyle = g;
   ctx.fillRect(0,0,W,H);
 
-  // silhouette hills
   ctx.fillStyle = 'rgba(10,12,35,0.9)';
   ctx.beginPath();
   ctx.moveTo(0,H);
@@ -466,11 +799,9 @@ function drawIntroScene(dt){
   ctx.closePath();
   ctx.fill();
 
-  // ground line
   ctx.fillStyle = '#0e1230';
   ctx.fillRect(0,H-60,W,60);
 
-  // embers
   introParticles.forEach(p=>{
     p.y -= p.speed;
     p.x += p.drift;
@@ -484,38 +815,24 @@ function drawIntroScene(dt){
   });
   ctx.shadowBlur = 0;
 
-  // Si Obor stands near the center and periodically waves "dada-dada".
-  // The subtle sway/scale keeps the intro lively without adding expensive animation work.
-  const oborW = 112;
-  const oborH = 116;
-  const introX = W * 0.5 - oborW * 0.5;
-  const bob = Math.sin(performance.now() * 0.004) * 3;
-  const introY = H - 60 - oborH + bob;
-  const useWaveSprite = introWaveActive && imgReady(imgOborWave);
-  const wavePhase = introWaveActive ? introWaveT / INTRO_WAVE_DURATION : 0;
-  const waveTilt = introWaveActive ? Math.sin(wavePhase * Math.PI * 4) * 0.045 : 0;
-  const waveScale = introWaveActive ? 1 + Math.sin(wavePhase * Math.PI * 2) * 0.025 : 1;
-  const introImg = useWaveSprite ? imgOborWave : imgObor;
-
-  ctx.save();
-  ctx.translate(introX + oborW/2, introY + oborH/2);
-  ctx.rotate(waveTilt);
-  ctx.scale(waveScale, waveScale);
-  if (imgReady(introImg)){
-    ctx.drawImage(introImg, -oborW/2, -oborH/2, oborW, oborH);
+  introWalkX += 0.6;
+  if (introWalkX > W+80) introWalkX = -80;
+  const bob = Math.sin(introWalkX*0.15) * 5;
+  const oy = H-60-58 + bob;
+  if (imgReady(gambarObor)){
+    ctx.drawImage(gambarObor, introWalkX, oy, 56, 58);
   } else {
     ctx.fillStyle = '#ffbe3d';
     ctx.shadowColor = 'rgba(255,150,30,0.9)';
     ctx.shadowBlur = 18;
-    roundRect(ctx, -25, -35, 50, 70, 12);
+    roundRect(ctx, introWalkX, oy, 30, 50, 8);
     ctx.fill();
     ctx.shadowBlur = 0;
     ctx.beginPath();
     ctx.fillStyle = '#ff5c1a';
-    ctx.arc(0, -43, 12, 0, Math.PI*2);
+    ctx.arc(introWalkX+15, oy-6, 9, 0, Math.PI*2);
     ctx.fill();
   }
-  ctx.restore();
 }
 function roundRect(c,x,y,w,h,r){
   c.beginPath();
@@ -529,12 +846,13 @@ function roundRect(c,x,y,w,h,r){
 
 /* =========================================================
    DIFFICULTY CONFIG
+   (affects hazard speed, healing efficiency & player agility)
 ========================================================= */
 const DIFFICULTIES = {
-  veryeasy:  { label:"Very Easy",  speed:3.2, spawnInterval:95,  healDrainScale:1.3 },
-  easy:      { label:"Easy",       speed:4.4, spawnInterval:78,  healDrainScale:1.0 },
-  hard:      { label:"Hard",       speed:6.0, spawnInterval:58,  healDrainScale:0.75 },
-  veryhard:  { label:"Very Hard",  speed:7.6, spawnInterval:42,  healDrainScale:0.55 }
+  veryeasy:  { label:"Very Easy",  hazardScale:0.70, healDrainScale:1.3, moveSpeed:4.4, jumpVel:-13.5 },
+  easy:      { label:"Easy",       hazardScale:1.00, healDrainScale:1.0, moveSpeed:4.1, jumpVel:-13.0 },
+  hard:      { label:"Hard",       hazardScale:1.30, healDrainScale:0.8, moveSpeed:3.9, jumpVel:-12.6 },
+  veryhard:  { label:"Very Hard",  hazardScale:1.60, healDrainScale:0.6, moveSpeed:3.7, jumpVel:-12.2 }
 };
 let currentDifficulty = DIFFICULTIES.easy;
 
@@ -546,14 +864,104 @@ document.querySelectorAll('.diff-btn').forEach(btn=>{
 });
 
 /* =========================================================
-   LEVELS
+   LEVEL DATA — Mario-style static layout
+   Each level has: solid ground segments + floating platforms
+   (all static, world-space coordinates), statically placed
+   collectibles, patrolling wind hazards, and a finish line.
 ========================================================= */
+const GROUND_TOP = 460;      // top-of-ground y coordinate
+const GROUND_H   = 120;      // ground block thickness (extends past canvas bottom)
+
+function seg(x,w){ return { x:x, y:GROUND_TOP, w:w, h:GROUND_H, solid:true, kind:'ground' }; }
+function plat(x,y,w){ return { x:x, y:y, w:w, h:20, solid:true, kind:'float' }; }
+function fruit(x,y){ return { type:'fruit', x:x, y:y-34, w:34, h:34, collected:false }; }
+function water(x,y){ return { type:'water', x:x, y:y-34, w:40, h:34, collected:false }; }
+function wind(baseY,rMin,rMax,spd){
+  return { type:'wind', x:rMin, y:baseY, w:56, h:50, rMin:rMin, rMax:rMax, speed:spd, dir:1 };
+}
+function finishLine(x){ return { x:x, y:270, w:18, h:190 }; }
+
 const LEVELS = [
-  { name:"Kota Tanjung",       bg:imgBgKota,  length:3200, fallbackColor:['#1b3a5c','#0d1c33'] },
-  { name:"Jalur Emas Hitam",   bg:imgBgHutan, length:3400, fallbackColor:['#1a3320','#0c1a10'] },
-  { name:"Gua Liang Tapah",    bg:imgBgGua,   length:3600, fallbackColor:['#241626','#0d0710'] }
+  {
+    name:"Kota Tanjung",
+    bg: bgKota,
+    fallbackColor:['#1b3a5c','#0d1c33'],
+    length:2500,
+    startX:60,
+    platforms:[
+      seg(0,460), seg(560,420), seg(1080,420), seg(1600,900),
+      plat(620,340,120), plat(820,260,110), plat(1150,360,130), plat(1330,280,110),
+      plat(1700,350,150), plat(1950,260,130), plat(2150,360,120)
+    ],
+    fruits:[
+      fruit(100,460), fruit(300,460), fruit(650,340), fruit(850,260), fruit(1180,360),
+      fruit(1360,280), fruit(1730,350), fruit(1980,260), fruit(2180,360), fruit(2300,460)
+    ],
+    waters:[
+      water(600,460), water(900,460), water(1200,460), water(1650,460), water(2050,460)
+    ],
+    hazards:[
+      wind(380,440,580,1.6), wind(200,650,900,1.8), wind(340,960,1100,1.7),
+      wind(220,1150,1380,2.0), wind(380,1480,1620,1.6), wind(200,1700,2000,2.1),
+      wind(340,2100,2350,1.9)
+    ],
+    finish: finishLine(2450)
+  },
+  {
+    name:"Jalur Emas Hitam",
+    bg: bgHutan,
+    fallbackColor:['#1a3320','#0c1a10'],
+    length:2800,
+    startX:60,
+    platforms:[
+      seg(0,420), seg(540,360), seg(1010,370), seg(1500,350), seg(1970,830),
+      plat(470,320,100), plat(650,240,100), plat(950,360,120), plat(1120,270,110),
+      plat(1420,330,110), plat(1600,250,110), plat(1900,340,130), plat(2100,250,110), plat(2350,330,120)
+    ],
+    fruits:[
+      fruit(80,460), fruit(250,460), fruit(500,320), fruit(680,240), fruit(980,360),
+      fruit(1150,270), fruit(1450,330), fruit(1630,250), fruit(1930,340), fruit(2130,250),
+      fruit(2380,330), fruit(2650,460)
+    ],
+    waters:[
+      water(600,460), water(1050,460), water(1550,460), water(2000,460), water(2500,460)
+    ],
+    hazards:[
+      wind(360,400,560,2.0), wind(200,620,900,2.2), wind(320,870,1030,2.1),
+      wind(230,1080,1400,2.3), wind(360,1350,1520,2.0), wind(220,1550,1900,2.4),
+      wind(340,1830,1990,2.1), wind(230,2050,2400,2.5), wind(360,2400,2700,2.2)
+    ],
+    finish: finishLine(2750)
+  },
+  {
+    name:"Gua Liang Tapah",
+    bg: bgGua,
+    fallbackColor:['#241626','#0d0710'],
+    length:3100,
+    startX:60,
+    platforms:[
+      seg(0,380), seg(520,300), seg(950,300), seg(1390,260), seg(1790,310), seg(2230,870),
+      plat(430,300,90), plat(600,220,90), plat(860,340,100), plat(1020,250,90),
+      plat(1300,320,100), plat(1460,240,90), plat(1700,310,100), plat(1860,230,90),
+      plat(2140,330,100), plat(2320,240,90), plat(2600,320,100)
+    ],
+    fruits:[
+      fruit(60,460), fruit(220,460), fruit(460,300), fruit(630,220), fruit(890,340),
+      fruit(1050,250), fruit(1330,320), fruit(1490,240), fruit(1730,310), fruit(1890,230),
+      fruit(2170,330), fruit(2350,240), fruit(2630,320), fruit(2900,460)
+    ],
+    waters:[
+      water(680,460), water(1080,460), water(1500,460), water(1900,460), water(2400,460), water(2800,460)
+    ],
+    hazards:[
+      wind(340,360,540,2.3), wind(180,580,880,2.6), wind(320,800,960,2.4),
+      wind(210,1000,1320,2.7), wind(340,1230,1400,2.3), wind(210,1440,1720,2.8),
+      wind(330,1630,1800,2.4), wind(200,1840,2160,2.9), wind(340,2080,2240,2.5),
+      wind(210,2300,2620,2.9), wind(340,2580,2950,2.6)
+    ],
+    finish: finishLine(3050)
+  }
 ];
-const TOTAL_DISTANCE = LEVELS.reduce((s,l)=>s+l.length,0);
 
 const TRIVIA_FACTS = [
   "Tugu Obor Pancasila adalah salah satu ikon kebanggaan masyarakat Kabupaten Tabalong.",
@@ -570,195 +978,267 @@ function randomTrivia(){
 }
 
 /* =========================================================
-   PLAYER
+   PLAYER (classic Mario-style run & jump physics)
 ========================================================= */
-// Si Obor dibuat lebih gembul/lebar agar proporsi karakter asli tetap terasa.
-const PLAYER_W = 96, PLAYER_H = 94;
+const PLAYER_W = 46, PLAYER_H = 62;
+const GRAVITY = 0.75;
+const MAX_FALL = 17;
+
 let player = {
-  x: 140,
-  y: GROUND_Y - PLAYER_H,
-  w: PLAYER_W,
-  h: PLAYER_H,
-  vy: 0,
-  gravityDir: 1,   // 1 = normal (falls to floor), -1 = inverted (falls to ceiling)
-  sliding: false,
+  x: 60, y: 0, w: PLAYER_W, h: PLAYER_H,
+  vx: 0, vy: 0,
+  onGround: false,
+  facing: 1,
   animT: 0
 };
-const GRAVITY = 0.62;
-const FLIP_KICK = 9;
-const MAX_VY = 14;
+let checkpoint = { x:60, y:0 };
+let invulnTimer = 0;
 
-function resetPlayer(){
-  player.x = 140;
-  player.gravityDir = 1;
-  player.y = GROUND_Y - PLAYER_H;
-  player.vy = 0;
-  player.sliding = false;
-  player.animT = 0;
+function resetPlayerToLevelStart(){
+  const lvl = LEVELS[currentLevelIndex];
+  player.x = lvl.startX;
+  player.y = GROUND_TOP - PLAYER_H;
+  player.vx = 0; player.vy = 0;
+  player.onGround = true;
+  player.facing = 1;
+  checkpoint = { x: player.x, y: player.y };
+  invulnTimer = 0;
 }
 
-function flipGravity(){
+/* input state */
+const input = { left:false, right:false, jumpEdge:false };
+
+function tryJump(){
   if (gameState !== STATE.PLAYING) return;
-  player.gravityDir *= -1;
-  player.vy = -player.gravityDir * FLIP_KICK;
-}
-
-function setSliding(v){
-  player.sliding = v;
+  if (player.onGround){
+    player.vy = currentDifficulty.jumpVel;
+    player.onGround = false;
+  }
 }
 
 function updatePlayer(){
   player.animT += 1;
-  player.vy += GRAVITY * player.gravityDir;
-  if (player.vy > MAX_VY) player.vy = MAX_VY;
-  if (player.vy < -MAX_VY) player.vy = -MAX_VY;
-  player.y += player.vy;
+  const lvl = LEVELS[currentLevelIndex];
+  const speed = currentDifficulty.moveSpeed;
 
-  const fullH = PLAYER_H;
-  const curH = player.sliding ? fullH/2 : fullH;
-  player.h = curH;
+  // horizontal intent
+  let targetVx = 0;
+  if (input.left && !input.right){ targetVx = -speed; player.facing = -1; }
+  else if (input.right && !input.left){ targetVx = speed; player.facing = 1; }
+  player.vx = targetVx;
 
-  if (player.gravityDir === 1){
-    // anchored toward floor
-    const floorTop = GROUND_Y - curH;
-    if (player.y > floorTop){ player.y = floorTop; player.vy = 0; }
-    const ceilLimit = CEIL_Y;
-    if (player.y < ceilLimit){ player.y = ceilLimit; player.vy = 0; }
-  } else {
-    // anchored toward ceiling
-    const ceilTop = CEIL_Y;
-    if (player.y < ceilTop){ player.y = ceilTop; player.vy = 0; }
-    const floorLimit = GROUND_Y - curH;
-    if (player.y > floorLimit){ player.y = floorLimit; player.vy = 0; }
+  // --- horizontal movement + collision ---
+  let newX = player.x + player.vx;
+  if (newX < 0) newX = 0;
+  if (newX > lvl.length - player.w) newX = lvl.length - player.w;
+  for (const p of lvl.platforms){
+    if (!p.solid) continue;
+    const vOverlap = player.y < p.y + p.h && player.y + player.h > p.y;
+    if (!vOverlap) continue;
+    if (player.vx > 0 && player.x + player.w <= p.x && newX + player.w > p.x){
+      newX = p.x - player.w;
+    } else if (player.vx < 0 && player.x >= p.x + p.w && newX < p.x + p.w){
+      newX = p.x + p.w;
+    }
   }
+  player.x = newX;
+
+  // --- vertical movement + collision ---
+  player.vy += GRAVITY;
+  if (player.vy > MAX_FALL) player.vy = MAX_FALL;
+  let newY = player.y + player.vy;
+  player.onGround = false;
+  for (const p of lvl.platforms){
+    if (!p.solid) continue;
+    const hOverlap = player.x < p.x + p.w && player.x + player.w > p.x;
+    if (!hOverlap) continue;
+    if (player.vy >= 0 && player.y + player.h <= p.y && newY + player.h >= p.y){
+      newY = p.y - player.h;
+      player.vy = 0;
+      player.onGround = true;
+      checkpoint = { x: player.x, y: newY };
+    } else if (player.vy < 0 && player.y >= p.y + p.h && newY <= p.y + p.h){
+      newY = p.y + p.h;
+      player.vy = 0;
+    }
+  }
+  player.y = newY;
+
+  // fell into a pit / chasm -> take fall damage, respawn at last checkpoint
+  if (player.y > H + 80){
+    health = Math.max(0, health - 25*currentDifficulty.healDrainScale);
+    player.x = checkpoint.x;
+    player.y = checkpoint.y;
+    player.vx = 0; player.vy = 0;
+    invulnTimer = 60;
+    if (health <= 0){ triggerGameOver(); return; }
+  }
+
+  if (invulnTimer > 0) invulnTimer--;
 }
 
 function drawPlayer(){
-  const img = player.sliding ? imgOborSlide : imgObor;
+  const img = gambarObor;
   ctx.save();
-  ctx.imageSmoothingEnabled = false;
-  // Thick pixel-era halo/outline improves contrast against detailed Tabalong scenery.
-  ctx.shadowColor = 'rgba(255,150,30,.98)';
-  ctx.shadowBlur = 14;
-  // Gravity hanya membalik arah gerak/posisi Si Obor.
-  // Sprite tetap tegak supaya badan dan wajah tidak ikut terbalik saat melayang ke atas.
-  drawObor(img, player.x, player.y, player.w, player.h);
-  ctx.restore();
-}
-function drawObor(img,x,y,w,h){
+  const visualW = 54, visualH = 66;
+  const drawX = player.x + (player.w - visualW)/2;
+  const drawY = player.y + (player.h - visualH);
+  const flashing = invulnTimer > 0 && Math.floor(invulnTimer/4)%2===0;
+  if (flashing) ctx.globalAlpha = 0.4;
+
+  if (player.facing < 0){
+    ctx.translate(drawX + visualW/2, 0);
+    ctx.scale(-1,1);
+    ctx.translate(-(drawX + visualW/2), 0);
+  }
+
   if (imgReady(img)){
-    ctx.drawImage(img, x, y, w, h);
+    ctx.drawImage(img, drawX, drawY, visualW, visualH);
   } else {
-    ctx.fillStyle = player.sliding ? '#ff9a4b' : '#ffbe3d';
+    ctx.fillStyle = '#ffbe3d';
     ctx.shadowColor = 'rgba(255,150,30,0.85)';
     ctx.shadowBlur = 14;
-    roundRect(ctx, x, y, w, h, 8);
+    roundRect(ctx, drawX, drawY, visualW, visualH, 8);
     ctx.fill();
     ctx.shadowBlur = 0;
     ctx.beginPath();
     ctx.fillStyle = '#ff5c1a';
-    ctx.arc(x+w/2, y-4, 8, 0, Math.PI*2);
+    ctx.arc(drawX+visualW/2, drawY-4, 8, 0, Math.PI*2);
     ctx.fill();
   }
+  ctx.restore();
 }
 
 /* =========================================================
-   ENTITIES (object pool via filtering)
+   PLATFORM / BLOCK DRAWING
 ========================================================= */
-let entities = [];
-let spawnTimer = 0;
-
-function spawnEntity(){
-  const roll = Math.random();
-  let type;
-  if (roll < 0.34) type = 'water';
-  else if (roll < 0.68) type = 'fruit';
-  else type = 'wind';
-
-  let e = { type, x: W + 20, vx: -currentDifficulty.speed };
-
-  if (type === 'water'){
-    e.w = 76; e.h = 64;
-    e.onFloor = Math.random() < 0.5;
-    e.y = e.onFloor ? GROUND_Y - e.h : CEIL_Y;
-  } else if (type === 'fruit'){
-    e.w = 58; e.h = 58;
-    const midTop = CEIL_Y + 60, midBottom = GROUND_Y - 60 - e.h;
-    e.y = midTop + Math.random()*(midBottom - midTop);
-    e.bobT = Math.random()*Math.PI*2;
-    e.baseY = e.y;
-  } else { // wind
-    e.w = 82; e.h = 62;
-    const topBand = CEIL_Y + 20, bottomBand = CEIL_Y + (GROUND_Y-CEIL_Y)*0.55;
-    e.y = topBand + Math.random()*(bottomBand-topBand);
-    e.bobT = Math.random()*Math.PI*2;
-    e.baseY = e.y;
-  }
-  entities.push(e);
-}
-
-function updateEntities(){
-  spawnTimer++;
-  if (spawnTimer >= currentDifficulty.spawnInterval){
-    spawnTimer = 0;
-    spawnEntity();
-  }
-  entities.forEach(e=>{
-    e.x += e.vx;
-    if (e.type === 'fruit'){
-      e.bobT += 0.06;
-      e.y = e.baseY + Math.sin(e.bobT)*8;
-    } else if (e.type === 'wind'){
-      e.bobT += 0.045;
-      e.y = e.baseY + Math.sin(e.bobT)*14;
+function drawPlatforms(lvl){
+  lvl.platforms.forEach(p=>{
+    if (imgReady(gambarBlok)){
+      const tw = gambarBlok.width, th = gambarBlok.height;
+      // tile the block sprite across the platform width/height
+      const cols = Math.max(1, Math.ceil(p.w / tw));
+      const rows = Math.max(1, Math.ceil(Math.min(p.h, 60) / th));
+      for (let r=0;r<rows;r++){
+        for (let c=0;c<cols;c++){
+          const dw = Math.min(tw, p.w - c*tw);
+          const dh = Math.min(th, p.h - r*th);
+          if (dw<=0||dh<=0) continue;
+          ctx.drawImage(gambarBlok, 0,0, dw/tw*tw, dh/th*th, p.x+c*tw, p.y+r*th, dw, dh);
+        }
+      }
+    } else {
+      // fallback: procedural brick-style block
+      const grad = ctx.createLinearGradient(0,p.y,0,p.y + Math.min(p.h,40));
+      if (p.kind === 'ground'){
+        grad.addColorStop(0,'#7a5230'); grad.addColorStop(1,'#4a3018');
+      } else {
+        grad.addColorStop(0,'#caa24a'); grad.addColorStop(1,'#8a6a24');
+      }
+      ctx.fillStyle = grad;
+      ctx.fillRect(p.x, p.y, p.w, Math.min(p.h, 400));
+      ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+      ctx.lineWidth = 2;
+      const brickW = 32, brickH = 18;
+      const visibleH = Math.min(p.h, 60);
+      for (let by=0; by<visibleH; by+=brickH){
+        const offset = (Math.floor(by/brickH)%2===0) ? 0 : brickW/2;
+        for (let bx=-offset; bx<p.w; bx+=brickW){
+          ctx.strokeRect(p.x+bx, p.y+by, brickW, brickH);
+        }
+      }
+      // top highlight edge
+      ctx.fillStyle = p.kind==='ground' ? 'rgba(140,200,90,0.85)' : 'rgba(255,224,140,0.85)';
+      ctx.fillRect(p.x, p.y, p.w, 6);
     }
   });
-  // object pooling: strict filtering once entities clear left boundary
-  entities = entities.filter(e => e.x + e.w > -10);
 }
 
-function drawPixelShadow(x,y,w,h,color){
-  ctx.fillStyle=color; ctx.fillRect(x+5,y+h-4,w-10,5);
-}
-function drawQuestionBlock(x,y,w,h){
-  ctx.fillStyle='#d88a2b'; ctx.fillRect(x,y,w,h);
-  ctx.fillStyle='#ffcf4a'; ctx.fillRect(x+3,y+3,w-6,4);
-  ctx.fillStyle='#7a3b20'; ctx.fillRect(x+3,y+h-7,w-6,4);
-  ctx.strokeStyle='#5a2a1d'; ctx.lineWidth=4; ctx.strokeRect(x+2,y+2,w-4,h-4);
-  ctx.fillStyle='#fff2a3'; ctx.font='bold 28px monospace'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('?',x+w/2,y+h/2+1);
-}
-function drawEntities(){
-  entities.forEach(e=>{
-    let img = e.type==='water'?imgRintangan:e.type==='fruit'?imgLangsat:imgAngin;
-    ctx.save(); ctx.imageSmoothingEnabled=false;
-    if(e.type==='fruit'){
-      // Floating retro item block behind the Langsat.
-      drawQuestionBlock(e.x-7,e.y-7,e.w+14,e.h+14);
+/* =========================================================
+   COLLECTIBLES (static Mario-style coin/item placement)
+========================================================= */
+function drawCollectibles(lvl){
+  const bobPhase = player.animT * 0.05;
+  lvl.fruits.forEach(f=>{
+    if (f.collected) return;
+    const by = f.y + Math.sin(bobPhase + f.x*0.01)*4;
+    if (imgReady(gambarLangsat)){
+      ctx.drawImage(gambarLangsat, f.x, by, f.w, f.h);
+    } else {
+      ctx.save();
+      ctx.fillStyle = '#ffd166'; ctx.shadowColor='rgba(255,209,102,0.9)'; ctx.shadowBlur=10;
+      ctx.beginPath(); ctx.arc(f.x+f.w/2, by+f.h/2, f.w/2, 0, Math.PI*2); ctx.fill();
+      ctx.restore();
     }
-    // High-contrast pixel shadow / outline keeps hazards readable over busy backgrounds.
-    if(e.type==='water') drawPixelShadow(e.x,e.y,e.w,e.h,'#17335d');
-    else if(e.type==='wind') drawPixelShadow(e.x,e.y,e.w,e.h,'#1a2347');
-    else drawPixelShadow(e.x,e.y,e.w,e.h,'#5c321e');
-    ctx.shadowColor = e.type==='water'?'rgba(30,170,255,.9)':e.type==='fruit'?'rgba(255,210,60,.95)':'rgba(230,250,255,.95)';
-    ctx.shadowBlur=8;
-    if(imgReady(img)) ctx.drawImage(img,e.x,e.y,e.w,e.h);
-    else {
-      ctx.shadowBlur=0;
-      if(e.type==='water'){
-        ctx.fillStyle='#29a8ff'; for(let i=0;i<6;i++)ctx.fillRect(e.x+8+i*10,e.y+18-(i%2)*8,7,28+(i%3)*8);
-        ctx.fillStyle='#bff5ff'; ctx.fillRect(e.x+13,e.y+12,4,18);
-      } else if(e.type==='fruit'){
-        ctx.fillStyle='#ffd34d'; ctx.fillRect(e.x+12,e.y+8,34,40); ctx.fillStyle='#f39a25'; ctx.fillRect(e.x+17,e.y+13,24,30); ctx.fillStyle='#8d4d26'; ctx.fillRect(e.x+27,e.y+2,5,10);
-      } else {
-        ctx.fillStyle='#d9f6ff'; for(let i=0;i<4;i++){ctx.fillRect(e.x+12+i*13,e.y+8+i*7,30-i*5,7);}
+  });
+  lvl.waters.forEach(w=>{
+    if (w.collected) return;
+    if (imgReady(gambarRintangan)){
+      ctx.drawImage(gambarRintangan, w.x, w.y, w.w, w.h);
+    } else {
+      ctx.save();
+      ctx.fillStyle = '#3fb0ff'; ctx.shadowColor='rgba(63,176,255,0.8)'; ctx.shadowBlur=10;
+      roundRect(ctx, w.x, w.y, w.w, w.h, 8); ctx.fill();
+      ctx.restore();
+    }
+  });
+}
+
+/* =========================================================
+   HAZARDS — Wind / Tornado (patrolling dynamic obstacle)
+========================================================= */
+function updateHazards(lvl){
+  const scale = currentDifficulty.hazardScale;
+  lvl.hazards.forEach(h=>{
+    h.x += h.speed*scale*h.dir;
+    if (h.x <= h.rMin){ h.x = h.rMin; h.dir = 1; }
+    if (h.x + h.w >= h.rMax + h.w){ h.x = h.rMax; h.dir = -1; }
+  });
+}
+function drawHazards(lvl){
+  const bobPhase = player.animT * 0.08;
+  lvl.hazards.forEach(h=>{
+    const dy = Math.sin(bobPhase + h.x*0.02) * 6;
+    if (imgReady(gambarAngin)){
+      ctx.drawImage(gambarAngin, h.x, h.y+dy, h.w, h.h);
+    } else {
+      ctx.save();
+      ctx.fillStyle = '#c8e8ff'; ctx.shadowColor='rgba(200,232,255,0.7)'; ctx.shadowBlur=10;
+      roundRect(ctx, h.x, h.y+dy, h.w, h.h, 10); ctx.fill();
+      ctx.restore();
+    }
+  });
+}
+
+/* =========================================================
+   FINISH LINE
+========================================================= */
+function drawFinish(lvl){
+  const f = lvl.finish;
+  if (imgReady(gambarFinish)){
+    ctx.drawImage(gambarFinish, f.x-20, f.y-10, 60, f.h+30);
+  } else {
+    // pole
+    ctx.fillStyle = '#e8e8e8';
+    ctx.fillRect(f.x, f.y, 6, f.h);
+    // checkered flag
+    const flagW=44, flagH=30;
+    for (let r=0;r<4;r++){
+      for (let c=0;c<4;c++){
+        ctx.fillStyle = (r+c)%2===0 ? '#111' : '#fff';
+        ctx.fillRect(f.x+6+c*(flagW/4), f.y+r*(flagH/4), flagW/4, flagH/4);
       }
     }
-    ctx.shadowBlur=0; ctx.restore();
-  });
+    ctx.fillStyle = '#ffd166';
+    ctx.font = 'bold 14px "Baloo 2", cursive';
+    ctx.textAlign = 'center';
+    ctx.fillText('FINISH', f.x+3, f.y-14);
+    ctx.textAlign = 'left';
+  }
 }
 
 /* =========================================================
-   COLLISION
+   COLLISION HELPERS
 ========================================================= */
 function rectsOverlap(a,b){
   return a.x < b.x+b.w && a.x+a.w > b.x && a.y < b.y+b.h && a.y+a.h > b.y;
@@ -768,91 +1248,102 @@ function rectsOverlap(a,b){
    RUN STATE
 ========================================================= */
 let score = 0;
-let fruitCount = 0;
 let health = 100;
-let distance = 0;
 let currentLevelIndex = 0;
-let pendingLevelIndex = 0;
+let pendingAction = null; // 'next' | 'win'
 
 function startGame(){
-  if (bgmGame.paused){
-    const p = bgmGame.play();
-    if (p && typeof p.catch === 'function') p.catch(()=>{});
-  }
   score = 0;
-  fruitCount = 0;
   health = 100;
-  distance = 0;
   currentLevelIndex = 0;
-  entities = [];
-  spawnTimer = 0;
-  resetPlayer();
+  resetLevelEntities();
+  resetPlayerToLevelStart();
   gameState = STATE.PLAYING;
 
   elDifficulty.classList.add('hidden');
   elTrivia.classList.add('hidden');
   elGameOver.classList.add('hidden');
   elHud.classList.remove('hidden');
-  slideBtn.classList.remove('hidden');
+  controlsLeft.classList.remove('hidden');
+  controlsRight.classList.remove('hidden');
 
   updateHud();
 }
 
+function resetLevelEntities(){
+  const lvl = LEVELS[currentLevelIndex];
+  lvl.fruits.forEach(f=>f.collected=false);
+  lvl.waters.forEach(w=>w.collected=false);
+  lvl.hazards.forEach((h,i)=>{ h.x = h.rMin; h.dir = 1; });
+}
+
 function updateHud(){
-  hudScore.textContent = String(score).padStart(6,'0');
-  if (hudHighscore) hudHighscore.textContent = Math.max(highScore, score);
-  if (hudFruitCount) hudFruitCount.textContent = fruitCount;
-  const worldNames = ['TANJUNG','MINING','LIANG TAPAH'];
-  levelLabel.textContent = `1-${currentLevelIndex+1}: ${worldNames[currentLevelIndex]}`;
-  const pct = Math.min(100, (distance/TOTAL_DISTANCE)*100);
+  hudScore.textContent = score;
+  hudHighscore.textContent = Math.max(highScore, score);
+  const lvl = LEVELS[currentLevelIndex];
+  levelLabel.textContent = lvl.name;
+  const pct = Math.min(100, (player.x/lvl.length)*100);
   distanceFill.style.width = pct + '%';
   healthFill.style.width = Math.max(0,health) + '%';
 }
 
-function levelStartDistance(idx){
-  let d=0; for(let i=0;i<idx;i++) d+=LEVELS[i].length; return d;
+let cameraX = 0;
+function updateCamera(){
+  const lvl = LEVELS[currentLevelIndex];
+  cameraX = player.x + player.w/2 - W/2;
+  if (cameraX < 0) cameraX = 0;
+  if (cameraX > lvl.length - W) cameraX = Math.max(0, lvl.length - W);
 }
 
 function updateGame(){
+  const lvl = LEVELS[currentLevelIndex];
   updatePlayer();
-  updateEntities();
+  if (gameState !== STATE.PLAYING) return; // may have changed inside updatePlayer (game over)
+  updateHazards(lvl);
+  updateCamera();
 
-  distance += currentDifficulty.speed;
-
-  // level threshold check
-  const nextIdx = currentLevelIndex+1;
-  if (nextIdx < LEVELS.length && distance >= levelStartDistance(nextIdx)){
-    pendingLevelIndex = nextIdx;
-    triggerTrivia();
-    return;
-  }
-  if (distance >= TOTAL_DISTANCE){
-    triggerWin();
-    return;
-  }
-
-  // collisions
   const hitbox = { x:player.x, y:player.y, w:player.w, h:player.h };
-  for (let i=entities.length-1;i>=0;i--){
-    const e = entities[i];
-    if (rectsOverlap(hitbox, e)){
-      if (e.type === 'water'){
-        playSfx(sfxWater);
-        health = Math.min(100, health + 15*currentDifficulty.healDrainScale);
-      } else if (e.type === 'fruit'){
-        playSfx(sfxLangsat);
-        score += 10;
-        fruitCount += 1;
-      } else if (e.type === 'wind'){
+
+  // collectibles
+  lvl.fruits.forEach(f=>{
+    if (!f.collected && rectsOverlap(hitbox, f)){
+      f.collected = true;
+      score += 10;
+      playSfx(sfxLangsat);
+    }
+  });
+  lvl.waters.forEach(w=>{
+    if (!w.collected && rectsOverlap(hitbox, w)){
+      w.collected = true;
+      health = Math.min(100, health + 15*currentDifficulty.healDrainScale);
+      playSfx(sfxWater);
+    }
+  });
+
+  // hazards (wind) — damage with brief invulnerability to avoid multi-hit per touch
+  if (invulnTimer <= 0){
+    for (const h of lvl.hazards){
+      if (rectsOverlap(hitbox, h)){
+        health = Math.max(0, health - 20*(2-currentDifficulty.healDrainScale)/1.3);
         playSfx(sfxWind);
-        health = Math.max(0, health - 20*(2-currentDifficulty.healDrainScale));
-      }
-      entities.splice(i,1);
-      if (health <= 0){
-        triggerGameOver();
-        return;
+        invulnTimer = 45;
+        player.vx = -player.facing*3; // small knockback
+        if (health <= 0){ triggerGameOver(); return; }
+        break;
       }
     }
+  }
+
+  // finish line
+  if (player.x + player.w >= lvl.finish.x){
+    if (currentLevelIndex < LEVELS.length - 1){
+      pendingAction = 'next';
+      triggerTrivia();
+    } else {
+      pendingAction = 'win';
+      triggerTrivia();
+    }
+    return;
   }
 
   updateHud();
@@ -864,18 +1355,20 @@ function triggerTrivia(){
   elTrivia.classList.remove('hidden');
 }
 btnTriviaContinue.addEventListener('click', ()=>{
-  currentLevelIndex = pendingLevelIndex;
-  entities = [];
   elTrivia.classList.add('hidden');
-  gameState = STATE.PLAYING;
-  updateHud();
+  if (pendingAction === 'next'){
+    currentLevelIndex++;
+    resetLevelEntities();
+    resetPlayerToLevelStart();
+    gameState = STATE.PLAYING;
+    updateHud();
+  } else if (pendingAction === 'win'){
+    triggerWin();
+  }
+  pendingAction = null;
 });
 
 function finalizeScoreAndShow(won){
-  bgmGame.pause();
-  try { bgmGame.currentTime = 0; } catch(e) {}
-  audioUnlocked = false;
-  elTrivia.classList.add('hidden');
   const beat = score > highScore;
   if (beat){ highScore = score; setHighScore(highScore); }
   goTitle.textContent = won ? "Nyala Obor Menyala Kembali!" : "Api Padam...";
@@ -884,13 +1377,9 @@ function finalizeScoreAndShow(won){
   goHighscore.textContent = highScore;
   newRecordEl.classList.toggle('hidden', !beat);
   elHud.classList.add('hidden');
-  slideBtn.classList.add('hidden');
-  elGameOver.classList.add('hidden');
-  window.setTimeout(()=>{
-    if (gameState === (won ? STATE.WIN : STATE.GAMEOVER)){
-      elGameOver.classList.remove('hidden');
-    }
-  }, 320);
+  controlsLeft.classList.add('hidden');
+  controlsRight.classList.add('hidden');
+  elGameOver.classList.remove('hidden');
 }
 
 function triggerGameOver(){
@@ -906,70 +1395,32 @@ btnRestart.addEventListener('click', ()=>{ startGame(); });
 btnMenu.addEventListener('click', ()=>{ goToDifficultyScreen(); });
 
 /* =========================================================
-   BACKGROUND DRAWING (per level, with parallax-ish fallback)
+   BACKGROUND DRAWING (parallax, per level)
 ========================================================= */
-let bgScrollX = 0;
-function drawPixelTile(x,y,w,h,variant){
-  const tile = 24;
-  for(let yy=y; yy<y+h; yy+=tile){
-    for(let xx=x; xx<x+w; xx+=tile){
-      const row = Math.floor((yy-y)/tile), col = Math.floor((xx-x)/tile);
-      ctx.fillStyle = ((row+col+(variant||0))%2===0) ? '#9a5634' : '#7b3f2a';
-      ctx.fillRect(xx,yy,Math.min(tile,w-(xx-x)),Math.min(tile,h-(yy-y)));
-      ctx.fillStyle = '#c87842';
-      ctx.fillRect(xx+2,yy+2,Math.min(18,w-(xx-x)-4),3);
-      ctx.fillStyle = '#4b251d';
-      ctx.fillRect(xx,yy+tile-3,Math.min(tile,w-(xx-x)),3);
-      if((row+col)%3===0){ ctx.fillStyle='#5d3023'; ctx.fillRect(xx+11,yy+10,4,4); }
+function drawLevelBackground(lvl){
+  const parallax = cameraX * 0.4;
+  if (imgReady(lvl.bg)){
+    const iw = lvl.bg.width, ih = lvl.bg.height;
+    const scale = H/ih;
+    const drawW = iw*scale;
+    let sx = (-parallax) % drawW; if (sx>0) sx -= drawW;
+    for (let x = sx; x < W; x += drawW){
+      ctx.drawImage(lvl.bg, x, 0, drawW, H);
+    }
+  } else {
+    const g = ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0, lvl.fallbackColor[0]);
+    g.addColorStop(1, lvl.fallbackColor[1]);
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,W,H);
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    for(let i=0;i<6;i++){
+      const bx = ((-parallax*0.5)+i*220) % (W+220) - 110;
+      ctx.beginPath();
+      ctx.ellipse(bx, H-160, 140, 60, 0, 0, Math.PI*2);
+      ctx.fill();
     }
   }
-}
-
-function drawRetroSkyDecor(){
-  // Low-cost pixel clouds, hills and distant Tabalong-inspired silhouettes.
-  ctx.save();
-  ctx.imageSmoothingEnabled = false;
-  ctx.fillStyle='rgba(255,255,255,.7)';
-  const clouds=[[120,145,70],[260,120,85],[510,150,80],[760,120,95]];
-  clouds.forEach(c=>{
-    ctx.fillRect(c[0],c[1],c[2],18); ctx.fillRect(c[0]+18,c[1]-12,30,30); ctx.fillRect(c[0]+42,c[1]-20,34,38);
-  });
-  ctx.fillStyle='rgba(31,91,105,.55)';
-  for(let x=-40;x<W+80;x+=130){
-    ctx.fillRect(x,GROUND_Y-120,70,120);
-    ctx.fillRect(x+18,GROUND_Y-155,32,35);
-  }
-  ctx.restore();
-}
-
-function drawRetroWorldTiles(){
-  // Mario-like repeating brown brick floor and inverted ceiling, recolored for SARABAKAWA.
-  drawPixelTile(0,GROUND_Y,W,H-GROUND_Y,0);
-  drawPixelTile(0,0,W,CEIL_Y,1);
-  // golden trim separates playable lane from tiles
-  ctx.fillStyle='#e4a644'; ctx.fillRect(0,GROUND_Y-5,W,5); ctx.fillRect(0,CEIL_Y,W,5);
-  ctx.fillStyle='#4a241c'; ctx.fillRect(0,GROUND_Y,W,3); ctx.fillRect(0,CEIL_Y+5,W,3);
-}
-
-function drawLevelBackground(){
-  const lvl = LEVELS[currentLevelIndex];
-  bgScrollX -= currentDifficulty.speed*0.4;
-  ctx.imageSmoothingEnabled = false;
-  if (imgReady(lvl.bg)){
-    const iw=lvl.bg.width, ih=lvl.bg.height;
-    const scale=H/ih;
-    const drawW=iw*scale;
-    let sx=bgScrollX%drawW; if(sx>0)sx-=drawW;
-    for(let x=sx;x<W;x+=drawW) ctx.drawImage(lvl.bg,x,0,drawW,H);
-  } else {
-    const g=ctx.createLinearGradient(0,0,0,H);
-    g.addColorStop(0,lvl.fallbackColor[0]); g.addColorStop(1,lvl.fallbackColor[1]);
-    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
-    drawRetroSkyDecor();
-  }
-  // A subtle pixel tint makes photographic/illustrative backgrounds read as a unified retro game world.
-  ctx.fillStyle='rgba(12,22,45,.10)'; ctx.fillRect(0,0,W,H);
-  drawRetroWorldTiles();
 }
 
 /* =========================================================
@@ -977,25 +1428,37 @@ function drawLevelBackground(){
 ========================================================= */
 let lastTime = 0;
 function loop(ts){
-  const dt = ts - lastTime; lastTime = ts;
+  let dt = ts - lastTime; lastTime = ts;
+  if (!(dt > 0) || dt > 80) dt = 16; // clamp first-frame / tab-refocus spikes
 
   if (gameState === STATE.INTRO){
     drawIntroScene(dt);
+    updateTypewriter(dt);
   } else if (gameState === STATE.DIFFICULTY){
-    drawIntroScene(dt); // keep ambient scene behind difficulty menu
+    drawIntroScene(dt);
   } else if (gameState === STATE.PLAYING){
-    drawLevelBackground();
+    const lvl = LEVELS[currentLevelIndex];
+    drawLevelBackground(lvl);
     updateGame();
-    drawEntities();
+    ctx.save();
+    ctx.translate(-cameraX, 0);
+    drawPlatforms(lvl);
+    drawCollectibles(lvl);
+    drawHazards(lvl);
+    drawFinish(lvl);
     drawPlayer();
-  } else if (gameState === STATE.TRIVIA){
-    drawLevelBackground();
-    drawEntities();
+    ctx.restore();
+  } else if (gameState === STATE.TRIVIA || gameState === STATE.GAMEOVER || gameState === STATE.WIN){
+    const lvl = LEVELS[currentLevelIndex];
+    drawLevelBackground(lvl);
+    ctx.save();
+    ctx.translate(-cameraX, 0);
+    drawPlatforms(lvl);
+    drawCollectibles(lvl);
+    drawHazards(lvl);
+    drawFinish(lvl);
     drawPlayer();
-  } else if (gameState === STATE.GAMEOVER || gameState === STATE.WIN){
-    drawLevelBackground();
-    drawEntities();
-    drawPlayer();
+    ctx.restore();
   }
 
   requestAnimationFrame(loop);
@@ -1003,42 +1466,39 @@ function loop(ts){
 requestAnimationFrame(loop);
 
 /* =========================================================
-   INPUT HANDLING
+   INPUT HANDLING (keyboard + on-screen d-pad/jump)
 ========================================================= */
-function handlePrimaryTap(ev){
-  // Never let canvas input interfere with Game Over / Win overlay buttons.
-  if (gameState === STATE.GAMEOVER || gameState === STATE.WIN) return;
-  if (gameState === STATE.PLAYING){
-    flipGravity();
-  }
-}
-canvas.addEventListener('mousedown', handlePrimaryTap);
-canvas.addEventListener('touchstart', (e)=>{ e.preventDefault(); handlePrimaryTap(e); }, {passive:false});
-
 window.addEventListener('keydown', (e)=>{
-  if (e.code === 'Space'){
-    e.preventDefault();
-    flipGravity();
-  } else if (e.code === 'ArrowDown'){
-    e.preventDefault();
-    setSliding(true);
-  }
+  unlockAudio();
+  if (e.code === 'ArrowLeft' || e.code === 'KeyA'){ e.preventDefault(); input.left = true; }
+  else if (e.code === 'ArrowRight' || e.code === 'KeyD'){ e.preventDefault(); input.right = true; }
+  else if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW'){ e.preventDefault(); tryJump(); }
 });
 window.addEventListener('keyup', (e)=>{
-  if (e.code === 'ArrowDown'){
-    setSliding(false);
-  }
+  if (e.code === 'ArrowLeft' || e.code === 'KeyA'){ input.left = false; }
+  else if (e.code === 'ArrowRight' || e.code === 'KeyD'){ input.right = false; }
 });
 
-slideBtn.addEventListener('pointerdown', (e)=>{ e.preventDefault(); setSliding(true); });
-slideBtn.addEventListener('pointerup', (e)=>{ e.preventDefault(); setSliding(false); });
-slideBtn.addEventListener('pointerleave', (e)=>{ setSliding(false); });
-slideBtn.addEventListener('touchstart', (e)=>{ e.preventDefault(); setSliding(true); }, {passive:false});
-slideBtn.addEventListener('touchend', (e)=>{ e.preventDefault(); setSliding(false); }, {passive:false});
+function bindHold(el, onDown, onUp){
+  el.addEventListener('pointerdown', (e)=>{ e.preventDefault(); unlockAudio(); onDown(); });
+  el.addEventListener('pointerup', (e)=>{ e.preventDefault(); onUp(); });
+  el.addEventListener('pointerleave', ()=>{ onUp(); });
+  el.addEventListener('pointercancel', ()=>{ onUp(); });
+  el.addEventListener('touchstart', (e)=>{ e.preventDefault(); unlockAudio(); onDown(); }, {passive:false});
+  el.addEventListener('touchend', (e)=>{ e.preventDefault(); onUp(); }, {passive:false});
+}
+bindHold(btnLeft, ()=>{ input.left = true; }, ()=>{ input.left = false; });
+bindHold(btnRight, ()=>{ input.right = true; }, ()=>{ input.right = false; });
+btnJump.addEventListener('pointerdown', (e)=>{ e.preventDefault(); unlockAudio(); tryJump(); });
+btnJump.addEventListener('touchstart', (e)=>{ e.preventDefault(); unlockAudio(); tryJump(); }, {passive:false});
+
+canvas.addEventListener('mousedown', unlockAudio);
+canvas.addEventListener('touchstart', unlockAudio, {passive:true});
 
 /* =========================================================
    INIT
 ========================================================= */
+resetPlayerToLevelStart();
 startIntro();
 
 })();
